@@ -28,16 +28,20 @@ Source tutorial https://developers.google.com/maps/documentation/javascript/tuto
 - Add to www/index.html `<script src="http://maps.google.com/maps/api/js?key=YOUR_API_KEY_GOES_HERE&sensor=true"></script>` After `<script src="js/app.js"></script>`
 
 #### Add a map
-- Add in www/js/app.js after the others .state()
+- Add in www/js/app.js after the .state('app')
 ```
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
-  .state('map', {
-      url: '/map',
-      templateUrl: 'templates/map.html',
-      controller: 'MapCtrl'
-    });
-  $urlRouterProvider.otherwise('/app/playlists');
+  .state('app.map', {
+    url: '/map',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/map.html',
+        controller: 'MapCtrl'
+      }
+    }
+  })
+  $urlRouterProvider.otherwise('/app/map');
 });
 ```
 - Add in www/js/controller.js a MapCtrl .controller()
@@ -80,4 +84,10 @@ Source tutorial https://developers.google.com/maps/documentation/javascript/tuto
     width: 100%;
     height: 100%;
 }
+```
+- Add in www/templates/menu.html a ion-item in the menu list
+```
+<ion-item menu-close href="#/app/map">
+  Map
+</ion-item>
 ```
