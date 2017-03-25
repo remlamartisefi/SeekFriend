@@ -1,9 +1,19 @@
 # Welcome to Seek Friend Apps Dev environnement
 
+<img src="https://cloud.githubusercontent.com/assets/1680157/9290919/b8dc1e5c-437a-11e5-8c91-e047e4810351.png">
+
 ## Installation guide
 - https://www.joshmorony.com/integrating-google-maps-with-an-ionic-application/
 
 ### Creation app step by step [status=working-progress]
+#### Prerequisites
+```
+>cordova plugin add cordova-plugin-whitelist
+```
+- Add to www/index.html in \<head\>
+
+`<meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src  'self' 'unsafe-inline' *">`
+
 #### Generate a New Ionic Application
 - Open a node terminal
 ```
@@ -19,7 +29,7 @@
 >bower install ngCordova
 ```
 - Add to www/index.html 
-`<script src="lib/ngCordova/dist/ng-cordova.js"></script>` 
+`<script src="lib/ngCordova/dist/ng-cordova.js"></script>`
 Before 
 `<script src="cordova.js"></script>`
 - Add ngCordova requirement in www/js/app.js 
