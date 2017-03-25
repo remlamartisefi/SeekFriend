@@ -3,7 +3,7 @@
 ## Installation guide
 - https://www.joshmorony.com/integrating-google-maps-with-an-ionic-application/
 
-### Steps Part 1 : Create ionic project
+### Creation app step by step [status=working-progress]
 #### Generate a New Ionic Application
 - Open a node terminal
 ```
@@ -15,6 +15,7 @@
 ```
 
 #### Add the Geolocation Plugin
+```
 >bower install ngCordova
 ```
 - Add to www/index.html `<script src="lib/ngCordova/dist/ng-cordova.js"></script>` Before `<script src="cordova.js"></script>`
