@@ -22,13 +22,25 @@ angular.module('starter', ['ionic', 'ngCordova'])
 .config(function($stateProvider, $urlRouterProvider) {
 
   $stateProvider
-  .state('map', {
-    url: '/',
-    templateUrl: 'templates/map.html',
-    controller: 'MapCtrl'
+  
+
+  .state('menu',{
+    url: '/menu',
+    templateUrl: 'templates/menu.html',
+  })
+
+  .state('menu.map', {
+    url: '/map',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/map.html',
+        controller: 'MapCtrl'
+      }
+    }
+    
   });
 
-  $urlRouterProvider.otherwise("/");
+  $urlRouterProvider.otherwise("/menu/map");
 
 })
 
