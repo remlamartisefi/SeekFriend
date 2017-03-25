@@ -18,15 +18,22 @@
 ```
 >bower install ngCordova
 ```
-- Add to www/index.html `<script src="lib/ngCordova/dist/ng-cordova.js"></script>` Before `<script src="cordova.js"></script>`
-- Add ngCordova requirement in www/js/app.js `angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])`
+- Add to www/index.html 
+`<script src="lib/ngCordova/dist/ng-cordova.js"></script>` 
+Before 
+`<script src="cordova.js"></script>`
+- Add ngCordova requirement in www/js/app.js 
+`angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])`
 ```
 >cordova plugin add cordova-plugin-geolocation
 ```
 
 #### Include the Google Maps JavaScript SDK
 Source tutorial https://developers.google.com/maps/documentation/javascript/tutorial
-- Add to www/index.html `<script src="http://maps.google.com/maps/api/js?key=YOUR_API_KEY_GOES_HERE&sensor=true"></script>` After `<script src="js/app.js"></script>`
+- Add to www/index.html 
+`<script src="http://maps.google.com/maps/api/js?key=YOUR_API_KEY_GOES_HERE&sensor=true"></script>` 
+After 
+`<script src="js/app.js"></script>`
 
 #### Add a map
 - Add in www/js/app.js after the .state('app')
