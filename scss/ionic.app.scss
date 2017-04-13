@@ -15,13 +15,11 @@ $royal:                           #886aea !default;
 $dark:                            #444 !default;
 */
 
-
 // The path for our ionicons font files, relative to the built CSS in www/css
 $ionicons-font-path: "../lib/ionic/fonts" !default;
 
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
-
 .scroll {
     height: 100%;
 }
@@ -29,9 +27,14 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 #map {
     width: 100%;
     height: 100%;
+    top:100px;
 }
+.labels {
+ color: black;
 
-#titre{
-	align:center; 
+ font-family: "Lucida Grande", "Arial", sans-serif;
+ font-size: 20px;
+ text-align: center;
+ width: 80px;     
+ white-space: nowrap;
 }
-
