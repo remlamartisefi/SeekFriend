@@ -6,7 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 
 angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
-// angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova','ionic-native-transitions'])
+// angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova','angular-md5','ionic-native-transitions'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {

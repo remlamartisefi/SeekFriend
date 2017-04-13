@@ -16,7 +16,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
 })
 
-.controller('SignCtrl',function($scope,$timeout){
+.controller('SignCtrl',function($scope,$timeout,$http){
   // Form data for the login modal
   $scope.loginData = {};
   $scope.registerData = {};
@@ -41,8 +41,24 @@ angular.module('starter.controllers', ['ngCordova'])
 
   $scope.doRegister = function() {
     $scope.registerForm.submitted = true;
-    console.log('Doing Register', $scope.registerData);
+    console.log('Doing Register', $scope.registerData); 
+    var data = {
+      email : $scope.registerData.email,
+      pseudo : $scope.registerData.pseudo,
+      //password : md5.createHash($scope.registerData.password || '')
+      password : $scope.registerData.password
+    };
+    if($scope.registerForm.submitted && !$scope.registerForm.Email.$invalid 
+      && !$scope.registerForm.Email.$error.email && !$scope.registerForm.Email.$error.pattern
+      && !$scope.registerForm.Pseudo.$error.minlength && !$scope.registerForm.Pseudo.$error.maxlength
+      && !$scope.registerForm.Password.$invalid && !$scope.registerForm.Password.$error.minlength
+      && !$scope.registerForm.Password.$error.maxlength){
+      console.log(data);
 
+      $http.post("http://localhost:8080/db/add-user", data).success(function(response){
+         console.log(response);
+      });
+    }
     $timeout(function() {
       $scope.closeRegister();
     }, 60000);
