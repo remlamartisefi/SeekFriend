@@ -1,22 +1,39 @@
-<ion-modal-view>
+<ion-modal-view style="min-height:300px;">
   <ion-header-bar>
+    <div class="pull-left buttons">
+      <button class="button button-balanced pull-left" ng-click="register_view()">Register</button> 
+    </div>
     <h1 class="title">Login</h1>
     <div class="buttons">
       <button class="button button-clear" ng-click="closeLogin()">Close</button>
     </div>
   </ion-header-bar>
-  <ion-content>
-    <form ng-submit="doLogin()">
+  <ion-content ng-controller="SignCtrl">
+    <form name="loginForm" data-ng-click="doLogin(loginData)">
       <div class="list">
-        <label class="item item-input">
-          <span class="input-label">Username</span>
-          <input type="text" ng-model="loginData.username">
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Email</span>
+          <input id="email" style="margin-right:20px;" type="email" data-ng-model="loginData.email" ng-pattern="emailFormat" placeholder="Email" name="Email" required>
         </label>
-        <label class="item item-input">
+        <label class="item item-input" style="border-top-width: 0px;">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Email.$invalid && !loginForm.Email.$error.email && !loginForm.Email.$error.pattern">Email address is required</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Email.$error.email">Email address is not valid</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Email.$error.email && !loginForm.Email.$error.pattern">Email address is not valid</span>
+          <span class="text-error" ng-style="{'color':'red'}" ng-show="loginForm.submitted && loginForm.Email.$error.pattern && !loginForm.Email.$error.email">Email address is not valid</span>
+        </label>
+        <label class="item item-input" style="border-bottom-width: 0px;">
           <span class="input-label">Password</span>
-          <input type="password" ng-model="loginData.password">
+          <input id="password" style="margin-right:20px;" type="password" name="Password" placeholder="Password" data-ng-model="loginData.password" data-ng-minlength="3 " data-ng-maxlength="32" required>
         </label>
-        <label class="item">
+        <label class="item item-input" style="border-top-width: 0px;">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$invalid && !loginForm.Password.$error.minlength && !loginForm.Password.$error.maxlength">
+             Password is required</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$error.minlength">
+              Password is too short</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$error.maxlength">
+            Password is too long</span>
+        </label>
+        <label class="item" style="border-bottom-width: 0px;">
           <button class="button button-block button-positive" type="submit">Log in</button>
         </label>
       </div>

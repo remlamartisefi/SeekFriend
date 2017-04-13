@@ -1,46 +1,53 @@
 angular.module('starter.controllers', ['ngCordova'])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+.controller('AppCtrl', function($scope, $ionicModal) {
+  // Create the login modal that we will use later
+  $ionicModal.fromTemplateUrl('templates/login.html', {scope: $scope}).then(function(modal) {$scope.login = modal;});
+  $ionicModal.fromTemplateUrl('templates/register.html', {scope: $scope}).then(function(modal) {$scope.register = modal;});
 
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  // var geo = {};
-  // $scope.$on('$ionicView.enter', function(e) {
-  //       geo = google.maps.Geocoder();
-  // });
+  // Triggered in the login or register modal to close it
+  $scope.closeLogin = function() {$scope.login.hide();};
+  $scope.openLogin = function() {$scope.login.show();};
+  $scope.closeRegister = function() {$scope.register.hide();};
+  $scope.openRegister = function() {$scope.register.show();};
+  // Switch Modal View
+  $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();}
+  $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();}
 
+})
+
+.controller('SignCtrl',function($scope,$timeout){
   // Form data for the login modal
   $scope.loginData = {};
-
-  // Create the login modal that we will use later
-  $ionicModal.fromTemplateUrl('templates/login.html', {
-    scope: $scope
-  }).then(function(modal) {
-    $scope.modal = modal;
-  });
-
-  // Triggered in the login modal to close it
-  $scope.closeLogin = function() {
-    $scope.modal.hide();
-  };
-
-  // Open the login modal
-  $scope.login = function() {
-    $scope.modal.show();
-  };
-
+  $scope.registerData = {};
+  $scope.emailFormat = /^[a-z]+[a-z0-9._]+@[a-z]+\.[a-z.]{2,5}$/;
   // Perform the login action when the user submits the login form
-  $scope.doLogin = function() {
+  $scope.doLogin = function(loginData) {
+    $scope.loginForm.submitted = true;
     console.log('Doing login', $scope.loginData);
 
+    /*if($scope.loginData.email.split("@").length == 2){
+
+    }else{
+      $scope.email.style = {'color':'red'};
+    }*/
     // Simulate a login delay. Remove this and replace with your login
     // code if using a login system
     $timeout(function() {
       $scope.closeLogin();
-    }, 1000);
+    }, 60000);
   };
+
+
+  $scope.doRegister = function() {
+    $scope.registerForm.submitted = true;
+    console.log('Doing Register', $scope.registerData);
+
+    $timeout(function() {
+      $scope.closeRegister();
+    }, 60000);
+  };
+
 })
 
 .controller('PlaylistsCtrl', function($scope) {
@@ -147,7 +154,7 @@ angular.module('starter.controllers', ['ngCordova'])
   });
 
   // .fromTemplateUrl() method
-  $ionicPopover.fromTemplateUrl('my-popover.html', {
+  $ionicPopover.fromTemplateUrl('templates/my-popover.html', {
     scope: $scope
   }).then(function(popover) {
     $scope.popover = popover;
@@ -179,6 +186,17 @@ angular.module('starter.controllers', ['ngCordova'])
     });
   });
 });
+
+
+
+  // With the new view caching in Ionic, Controllers are only called
+  // when they are recreated or on app start, instead of every page change.
+  // To listen for when this page is active (for example, to refresh data),
+  // listen for the $ionicView.enter event:
+  // var geo = {};
+  // $scope.$on('$ionicView.enter', function(e) {
+  //       geo = google.maps.Geocoder();
+  // });
  
  //alert////////////////////////////////////:
      // $scope.settings = function() {

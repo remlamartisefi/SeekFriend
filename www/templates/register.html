@@ -1,0 +1,52 @@
+<ion-modal-view style="min-height:360px;">
+  <ion-header-bar>
+    <div class="pull-left buttons">
+      <button class="button button-balanced pull-left" ng-click="login_view()">Log in</button> 
+    </div>
+    <h1 class="title">Register</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closeRegister()">Close</button>
+    </div>
+  </ion-header-bar>
+  <ion-content ng-controller="SignCtrl">
+    <form name="registerForm" data-ng-click="doRegister(registerData)">
+      <div class="list">
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Email</span>
+          <input id="email" style="margin-right:20px;" type="email" data-ng-model="registerData.email" ng-pattern="emailFormat" placeholder="Email" name="Email" required>
+        </label>
+        <label class="item item-input" style="border-top-width: 0px;">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Email.$invalid && !registerForm.Email.$error.email && !registerForm.Email.$error.pattern">Email address is required</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Email.$error.email">Email address is not valid</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Email.$error.email && !registerForm.Email.$error.pattern">Email address is not valid</span>
+          <span class="text-error" ng-style="{'color':'red'}" ng-show="registerForm.submitted && registerForm.Email.$error.pattern && !registerForm.Email.$error.email">Email address is not valid</span>
+        </label>
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Pseudo</span>
+          <input id="pseudo" style="margin-right:20px;" type="text" data-ng-model="registerData.pseudo" placeholder="Pseudo"" name="Pseudo" data-ng-minlength="3" data-ng-maxlength="24">
+        </label>
+        <label class="item item-input" style="border-top-width: 0px;">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Pseudo.$error.minlength">
+            Pseudo is too short</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Pseudo.$error.maxlength">
+            Pseudo is too long</span>
+        </label>
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Password</span>
+          <input id="password" style="margin-right:20px;" type="password" name="Password" placeholder="Password" data-ng-model="registerData.password" data-ng-minlength="3 " data-ng-maxlength="32" required>
+        </label>
+        <label class="item item-input" style="border-top-width: 0px;">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Password.$invalid && !registerForm.Password.$error.minlength && !registerForm.Password.$error.maxlength">
+             Password is required</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Password.$error.minlength">
+              Password is too short</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Password.$error.maxlength">
+            Password is too long</span>
+        </label>
+        <label class="item" style="border-bottom-width: 0px;">
+          <button class="button button-block button-positive" type="submit">Register</button>
+        </label>
+      </div>
+    </form>
+  </ion-content>
+</ion-modal-view>
