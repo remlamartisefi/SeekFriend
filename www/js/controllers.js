@@ -41,29 +41,44 @@ angular.module('starter.controllers', ['ngCordova'])
 
   $scope.doRegister = function() {
     $scope.registerForm.submitted = true;
-    console.log('Doing Register', $scope.registerData); 
-    var data = {
-      email : $scope.registerData.email,
-      pseudo : $scope.registerData.pseudo,
-      //password : md5.createHash($scope.registerData.password || '')
-      password : $scope.registerData.password
-    };
-    if($scope.registerForm.submitted && !$scope.registerForm.Email.$invalid 
-      && !$scope.registerForm.Email.$error.email && !$scope.registerForm.Email.$error.pattern
-      && !$scope.registerForm.Pseudo.$error.minlength && !$scope.registerForm.Pseudo.$error.maxlength
-      && !$scope.registerForm.Password.$invalid && !$scope.registerForm.Password.$error.minlength
-      && !$scope.registerForm.Password.$error.maxlength){
-      console.log(data);
 
-      $http.post("http://localhost:8080/db/add-user", data).success(function(response){
-         console.log(response);
+    if($scope.registerForm.submitted 
+      && !$scope.registerForm.Email.$invalid 
+      && !$scope.registerForm.Email.$error.email 
+      && !$scope.registerForm.Email.$error.pattern
+      && !$scope.registerForm.Pseudo.$error.minlength 
+      && !$scope.registerForm.Pseudo.$error.maxlength
+      && !$scope.registerForm.Password.$invalid 
+      && !$scope.registerForm.Password.$error.minlength
+      && !$scope.registerForm.Password.$error.maxlength){
+      console.log('Doing Register', $scope.registerData); 
+
+    // $http({
+    //   method: 'POST',
+    //   url: 'http://127.0.0.1:8080/users/add',
+    //   data : $scope.registerData,
+    // }).then(function successCallback(response) {
+    //     console.log(response);
+    //   }, function errorCallback(err,status,headers, config) {
+    //     console.log("error "+err+", status "+status+", headers"+headers);
+    //     console.log(config);
+    //   });
+
+    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+    // $http.defaults.headers.post["Access-Control-Allow-Origin"] = "http://localhost";
+      
+    $http.post('http://localhost:8080/users/add',$scope.registerData)
+      .success(function(response){
+        console.log(response);
+      }).error(function(err,status,headers, config) {
+        console.log("error "+err+", status "+status+", headers"+headers);
+        console.log(config);
       });
     }
     $timeout(function() {
       $scope.closeRegister();
     }, 60000);
   };
-
 })
 
 .controller('PlaylistsCtrl', function($scope) {
