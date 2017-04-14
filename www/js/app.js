@@ -1,5 +1,35 @@
 // Ionic Starter App
-
+var Application = function(){
+    this.user_id;
+    this.lat;
+    this.long;
+    this.isLog = false;
+    this.isReg = false;
+    this.email;
+    this.pseudo;
+  }
+  Application.setPosition = function([lat, long]){this.lat = lat;this.long = long;}
+  Application.getPosition = function(){return new google.maps.LatLng(this.lat,this.long);}
+  Application.setIsLog = function(is){this.isLog = is;
+    if(is == true)
+      document.getElementById("btn-login").style.display="none";
+    else
+      document.getElementById("btn-login").style.display="block";
+  }
+  Application.getIsLog = function(){return this.isLog;}
+  Application.setIsReg = function(is){this.isReg = is;
+    if(is == true)
+      document.getElementById("btn-register").style.display="none";
+    else
+      document.getElementById("btn-register").style.display="block";
+  }
+  Application.getIsReg = function(){return this.isReg;}
+  Application.setUser_id = function(id){this.user_id = id;}
+  Application.getUser_id = function(){return this.user_id};
+  Application.setEmail = function(email){this.email = email;}
+  Application.getEmail = function(){return this.email;}
+  Application.setPseudo = function(pseudo){this.pseudo = pseudo;}
+  Application.getPseudo = function(){return this.pseudo;}
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'

@@ -26,3 +26,12 @@ position: absolute; }
 -moz-animation: fadeOut 0.3s;
 animation: fadeOut 0.3s;
 position: absolute; }
+
+.scroll {
+    height: 100%;
+}
+ 
+#map {
+    width: 100%;
+    height: 100%;
+}

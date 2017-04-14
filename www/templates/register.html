@@ -46,6 +46,10 @@
         <label class="item" style="border-bottom-width: 0px;">
           <button class="button button-block button-positive" type="submit">Register</button>
         </label>
+        <label class="item item-input" style="border-top-width: 0px;border-bottom-width: 0px;">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="!registerForm.$error">
+             This email and pseudo if already used</span>
+        </label>
       </div>
     </form>
   </ion-content>

@@ -13,10 +13,10 @@
   <preference name="SplashScreenDelay" value="2000"/>
   <preference name="FadeSplashScreenDuration" value="2000"/>
   <preference name="android-minSdkVersion" value="16"/>
-  <preference name="android-targetSdkVersion" value="22" />
+  <preference name="android-targetSdkVersion" value="22"/>
   <preference name="BackupWebStorage" value="none"/>
   <preference name="SplashScreen" value="screen"/>
-  <preference name="CrosswalkAnimatable" value="true" /><!-- ionic-native-transitions for android -->
+  <preference name="CrosswalkAnimatable" value="true"/>
   <feature name="StatusBar">
     <param name="ios-package" value="CDVStatusBar" onload="true"/>
   </feature>
@@ -71,6 +71,8 @@
     <splash src="resources/android/splash/drawable-port-xhdpi-screen.png" density="port-xhdpi"/>
     <splash src="resources/android/splash/drawable-port-xxhdpi-screen.png" density="port-xxhdpi"/>
     <splash src="resources/android/splash/drawable-port-xxxhdpi-screen.png" density="port-xxxhdpi"/>
+
   </platform>
   <allow-navigation href="http://192.168.43.86:8100"/>
+  <allow-navigation href="http://10.0.75.1:8100"/>
 </widget>

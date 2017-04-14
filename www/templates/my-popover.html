@@ -3,6 +3,10 @@
 	  <h1 class="title">My Popover Title</h1>
 	</ion-header-bar>
 	<ion-content>
-	  Hello!
+	   <ion-list>
+	      <ion-item ng-repeat="user in pseudolist">
+	        {{user.pseudo}}
+	      </ion-item>
+	    </ion-list>
 	</ion-content>
 </ion-popover-view>
