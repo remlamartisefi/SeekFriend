@@ -10,23 +10,9 @@ var Application = function(){
   }
   Application.setPosition = function([lat, long]){this.lat = lat;this.long = long;}
   Application.getPosition = function(){return new google.maps.LatLng(this.lat,this.long);}
-  Application.setIsLog = function(is){this.isLog = is;
-    if(is == true){
-      document.getElementById("btn-login").style.display="none";
-      document.getElementById("btn-logout").style.display="block";
-    }else{
-      document.getElementById("btn-login").style.display="block";
-      document.getElementById("btn-logout").style.display="none";
-      document.getElementById("btn-register").style.display="block";
-    }
-  }
+  Application.setIsLog = function(is){this.isLog = is;}
   Application.getIsLog = function(){return this.isLog;}
-  Application.setIsReg = function(is){this.isReg = is;
-    if(is == true)
-      document.getElementById("btn-register").style.display="none";
-    else
-      document.getElementById("btn-register").style.display="block";
-  }
+  Application.setIsReg = function(is){this.isReg = is;}
   Application.getIsReg = function(){return this.isReg;}
   Application.setUser_id = function(id){this.user_id = id;}
   Application.getUser_id = function(){return this.user_id};

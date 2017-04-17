@@ -1,3 +1,7 @@
+// var url = 'http://mlollo.rmorpheus.enseirb.fr:80'
+// var url = 'http://localhost:8080'
+var url = 'http://6583358e.ngrok.io'
+
 angular.module('starter.controllers', ['ngCordova'])
 
 .controller('AppCtrl', function($scope, $ionicModal) {
@@ -6,6 +10,7 @@ angular.module('starter.controllers', ['ngCordova'])
   $ionicModal.fromTemplateUrl('templates/login.html', {scope: $scope}).then(function(modal) {$scope.login = modal;});
   $ionicModal.fromTemplateUrl('templates/register.html', {scope: $scope}).then(function(modal) {$scope.register = modal;});
   $ionicModal.fromTemplateUrl('templates/enableGeoloc.html', {scope: $scope}).then(function(modal) {$scope.enableGeoloc = modal;});
+  $ionicModal.fromTemplateUrl('templates/logout.html', {scope: $scope}).then(function(modal) {$scope.logout = modal;});
 
   // Triggered in the login or register modal to close it
   $scope.closeLogin = function() {$scope.login.hide();};
@@ -14,14 +19,25 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.openRegister = function() {$scope.register.show();};
   $scope.closeGeo = function() {$scope.enableGeoloc.hide();};
   $scope.openGeo = function() {$scope.enableGeoloc.show();};
+  $scope.closeLogout = function() {$scope.logout.hide();};
+  $scope.openLogout = function() {$scope.logout.show();};
   // Switch Modal View
   $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();}
   $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();}
+  $scope.logout_view = function(){$scope.closeLogout();$scope.openLogout();}
 
-  // if(Application.getIsReg()){
-  //   document.getElementById("btn-register").style.display="none";
-  // }
-
+  $scope.btn_login = function(){
+    if(Application.getIsLog())
+      $scope.btnLogin = true;
+    else 
+      $scope.btnLogin = false;
+  }
+  $scope.btn_register = function(){
+    if(Application.getIsReg())
+      $scope.btnRegister = true;
+    else 
+      $scope.btnRegister = false;
+  }
 })
 
 .controller('SignCtrl',function($scope,$timeout,$http){
@@ -32,24 +48,66 @@ angular.module('starter.controllers', ['ngCordova'])
   // Perform the login action when the user submits the login form
   $scope.doLogin = function(loginData) {
     $scope.loginForm.submitted = true;
-    console.log('Doing login', $scope.loginData);
 
-    /*if($scope.loginData.email.split("@").length == 2){
+    var data = {
+      email : $scope.loginData.email
+    }
 
-    }else{
-      $scope.email.style = {'color':'red'};
-    }*/
-    // Simulate a login delay. Remove this and replace with your login
-    // code if using a login system
+    if($scope.loginForm.submitted 
+      && !$scope.loginForm.Email.$invalid 
+      && !$scope.loginForm.Email.$error.email 
+      && !$scope.loginForm.Email.$error.pattern
+      && !$scope.loginForm.Password.$invalid 
+      && !$scope.loginForm.Password.$error.minlength
+      && !$scope.loginForm.Password.$error.maxlength)
+    {
+
+      $http.post(url + '/users/getbyemail', data)
+        .success(function(response){
+          if(response.length == 1 && response[0].password == $scope.loginData.password){
+            Application.setEmail(response[0].email);
+            Application.setPseudo(response[0].pseudo);
+            Application.setUser_id(response[0]._id);
+            console.log('Doing Login');
+            $http.defaults.headers.post["Content-Type"] = "application/json";
+
+            $http.post(url + '/users/login', data)
+              .success(function(response){
+                console.log(response);
+                Application.setIsLog(true);
+                $scope.btn_login();
+                $scope.closeLogin();
+              }).error(function(err, config) {console.log(config);});
+          }else{
+            $scope.loginForm.$error = false;
+          }
+        }).error(function(err, config) {console.log(config);});  
+    }    
     $timeout(function() {
       $scope.closeLogin();
     }, 60000);
   };
 
+  $scope.doLogout = function() {
+     var data = {
+        email : Application.getEmail()
+      }
+      console.log(data);
+    $http.defaults.headers.post["Content-Type"] = "application/json";
+    $http.post(url + '/users/logout', data)
+      .success(function(response){
+        console.log('Doing Logout');
+        console.log(response);
+        Application.setIsLog(false);
+        Application.setIsReg(false);
+        $scope.btn_login();
+        $scope.btn_register();
+        $scope.closeLogout();
+      }).error(function(err, config) {console.log(config);});
+  };
 
   $scope.doRegister = function() {
     $scope.registerForm.submitted = true;
-
     var data = {
       email : $scope.registerData.email,
       pseudo : $scope.registerData.pseudo,
@@ -65,40 +123,28 @@ angular.module('starter.controllers', ['ngCordova'])
       && !$scope.registerForm.Password.$error.minlength
       && !$scope.registerForm.Password.$error.maxlength)
     {
-      var data2 = {
-        email : $scope.registerData.email,
-        pseudo : $scope.registerData.pseudo,
-      }
-      
-      // $http.post('http://mlollo.rmorpheus.enseirb.fr:80/users/getbyemailnpseudo', data2)
-      // $http.post('http://localhost:8080/users/getbyemailnpseudo', data2)
-      $http.post('http://cb78b46a.ngrok.io/users/getbyemailnpseudo', data2)
+      $http.post(url + '/users/getbyemailnpseudo', data)
         .success(function(response){
           //console.log(response);
           if(response.length == 0){
             console.log('Doing Register');
             $http.defaults.headers.post["Content-Type"] = "application/json";
 
-            // Mettre l'adresse du ngrok qui change souvant
-            // $http.post('http://mlollo.rmorpheus.enseirb.fr:80/users/add', data)
-            // $http.post('http://localhost:8080/users/add', data)
-            $http.post('http://cb78b46a.ngrok.io/users/add', data)
+            $http.post(url + '/users/add', data)
               .success(function(response){
                 //console.log(response);
                 Application.setIsReg(true);
                 // Application.setIsLog(true);
                 Application.setEmail(data.email);
                 Application.setPseudo(data.pseudo);
-              
-                 // $http.post('http://mlollo.rmorpheus.enseirb.fr:80/users/getbyemailnpseudo', data2)
-                 // $http.post('http://localhost:8080/users/getbyemailnpseudo', data2)
-                 $http.post('http://cb78b46a.ngrok.io/users/getbyemailnpseudo', data2)
+                
+                 $http.post(url + '/users/getbyemailnpseudo', data)
                     .success(function(response){
                       //console.log(response);
-                      Application.setUser_id(response._id);
+                      Application.setUser_id(response[0]._id);
+                      $scope.btn_register();
+                      $scope.closeRegister(); 
                     }).error(function(err, config) {console.log(config);});
-                $scope.closeRegister();    
-                Application.setIsLog(true);
               }).error(function(err, config) {console.log(config);});
           }else{
             $scope.registerForm.$error = false;
@@ -126,16 +172,19 @@ angular.module('starter.controllers', ['ngCordova'])
 })
 
 
+
+
+
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation,$ionicLoading,$ionicPlatform) {
   $ionicPlatform.ready(function(){
     $ionicLoading.show({
         template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
     });
 
-    var geocoder = new google.maps.Geocoder();
       
-    var options = {timeout: 1000, enableHighAccuracy: true,maximumAge: 0}; 
+    var options = {timeout: 10000, enableHighAccuracy: true,maximumAge: 0}; 
     $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+      var geocoder = new google.maps.Geocoder();
       var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
       Application.setPosition([position.coords.latitude, position.coords.longitude]);
       var coord = new google.maps.LatLng(47.389982, 0.688877);
@@ -146,35 +195,38 @@ angular.module('starter.controllers', ['ngCordova'])
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };
 
-       // google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-       //    var marker = new google.maps.Marker({
-       //        map: $scope.map,
-       //        animation: google.maps.Animation.DROP,
-       //        position: latLng
-       //    });  
-
-       //    var marker2 = new google.maps.Marker({
-       //        map: $scope.map,
-       //        animation: google.maps.Animation.DROP,
-       //        position: coord
-       //    });      
-
-       //    var infoWindow = new google.maps.InfoWindow({
-       //        content: "Here I am!"
-       //    });
-
-       //    google.maps.event.addListener(marker2, 'click', function () {
-       //        infoWindow.open($scope.map, marker2);
-       //    }); 
-       // });
       geocoder.geocode({'latLng': latLng}, function (results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
           $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+          google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+            var marker = new google.maps.Marker({
+                map: $scope.map,
+                animation: google.maps.Animation.DROP,
+                position: latLng
+            });  
+
+            var marker2 = new google.maps.Marker({
+                map: $scope.map,
+                animation: google.maps.Animation.DROP,
+                position: coord
+            });      
+
+            var infoWindow = new google.maps.InfoWindow({
+                content: "Here I am!"
+            });
+
+            google.maps.event.addListener(marker2, 'click', function () {
+                infoWindow.open($scope.map, marker2);
+            }); 
+
+          });
         }
       });
       
     
         // $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      // $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      $ionicLoading.hide(); 
       //Wait until the map is loaded
     }, function(error){
       console.log("Could not get location");
@@ -217,13 +269,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
   $scope.openPopover = function($event) {
     $http.defaults.headers.common["Accept"] = "application/json";
-
-    // Mettre l'adresse du ngrok qui change souvant
-
-
-    // $http.get('http://mlollo.rmorpheus.enseirb.fr:80/users/getpseudo')
-    // $http.get('http://localhost:8080/users/getpseudo')
-    $http.get('http://cb78b46a.ngrok.io/users/getpseudo')
+    $http.get(url + '/users/getpseudo')
         .success(function(response){console.log(response);$scope.pseudolist = response;$scope.popover.show($event);
         })
         .error(function(err, config) {console.log(config);});

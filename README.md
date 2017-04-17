@@ -1,4 +1,5 @@
 # Welcome to Seek Friend Apps Dev environnement
+Utilisez ngrok pour faire fonctionner le backend en local avec le serveur ionic
 
 <img src="https://cloud.githubusercontent.com/assets/1680157/9290919/b8dc1e5c-437a-11e5-8c91-e047e4810351.png">
 
