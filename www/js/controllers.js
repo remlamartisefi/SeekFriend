@@ -69,7 +69,10 @@ angular.module('starter.controllers', ['ngCordova'])
         email : $scope.registerData.email,
         pseudo : $scope.registerData.pseudo,
       }
-      $http.post('http://9048a111.ngrok.io/users/getbyemailnpseudo', data2)
+      
+      // $http.post('http://mlollo.rmorpheus.enseirb.fr:80/users/getbyemailnpseudo', data2)
+      // $http.post('http://localhost:8080/users/getbyemailnpseudo', data2)
+      $http.post('http://cb78b46a.ngrok.io/users/getbyemailnpseudo', data2)
         .success(function(response){
           //console.log(response);
           if(response.length == 0){
@@ -77,15 +80,19 @@ angular.module('starter.controllers', ['ngCordova'])
             $http.defaults.headers.post["Content-Type"] = "application/json";
 
             // Mettre l'adresse du ngrok qui change souvant
-            $http.post('http://9048a111.ngrok.io/users/add', data)
+            // $http.post('http://mlollo.rmorpheus.enseirb.fr:80/users/add', data)
+            // $http.post('http://localhost:8080/users/add', data)
+            $http.post('http://cb78b46a.ngrok.io/users/add', data)
               .success(function(response){
                 //console.log(response);
                 Application.setIsReg(true);
-                Application.setIsLog(true);
+                // Application.setIsLog(true);
                 Application.setEmail(data.email);
                 Application.setPseudo(data.pseudo);
-                
-                 $http.post('http://9048a111.ngrok.io/users/getbyemailnpseudo', data2)
+              
+                 // $http.post('http://mlollo.rmorpheus.enseirb.fr:80/users/getbyemailnpseudo', data2)
+                 // $http.post('http://localhost:8080/users/getbyemailnpseudo', data2)
+                 $http.post('http://cb78b46a.ngrok.io/users/getbyemailnpseudo', data2)
                     .success(function(response){
                       //console.log(response);
                       Application.setUser_id(response._id);
@@ -127,7 +134,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
     var geocoder = new google.maps.Geocoder();
       
-    var options = {timeout: 10000, enableHighAccuracy: true,maximumAge: 0}; 
+    var options = {timeout: 1000, enableHighAccuracy: true,maximumAge: 0}; 
     $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
       var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
       Application.setPosition([position.coords.latitude, position.coords.longitude]);
@@ -139,37 +146,35 @@ angular.module('starter.controllers', ['ngCordova'])
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };
 
+       // google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+       //    var marker = new google.maps.Marker({
+       //        map: $scope.map,
+       //        animation: google.maps.Animation.DROP,
+       //        position: latLng
+       //    });  
+
+       //    var marker2 = new google.maps.Marker({
+       //        map: $scope.map,
+       //        animation: google.maps.Animation.DROP,
+       //        position: coord
+       //    });      
+
+       //    var infoWindow = new google.maps.InfoWindow({
+       //        content: "Here I am!"
+       //    });
+
+       //    google.maps.event.addListener(marker2, 'click', function () {
+       //        infoWindow.open($scope.map, marker2);
+       //    }); 
+       // });
       geocoder.geocode({'latLng': latLng}, function (results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
           $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
         }
       });
-      // $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-      $ionicLoading.hide(); 
-
-      google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-
-        var marker = new google.maps.Marker({
-            map: $scope.map,
-            animation: google.maps.Animation.DROP,
-            position: latLng
-        });  
-
-        var marker2 = new google.maps.Marker({
-            map: $scope.map,
-            animation: google.maps.Animation.DROP,
-            position: coord
-        });      
-
-        var infoWindow = new google.maps.InfoWindow({
-            content: "Here I am!"
-        });
-
-        google.maps.event.addListener(marker2, 'click', function () {
-            infoWindow.open($scope.map, marker2);
-        }); 
-
-      });
+      
+    
+        // $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
       //Wait until the map is loaded
     }, function(error){
       console.log("Could not get location");
@@ -182,7 +187,7 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.refreshGeo = function(){
     GeolocationSync(Application);
   }
- 
+
 })
 
 .controller('MenuCtrl', function($scope, $ionicPopup, $ionicHistory, $state, $ionicPopover,$http) {
@@ -214,7 +219,11 @@ angular.module('starter.controllers', ['ngCordova'])
     $http.defaults.headers.common["Accept"] = "application/json";
 
     // Mettre l'adresse du ngrok qui change souvant
-    $http.get('http://9048a111.ngrok.io/users/getpseudo')
+
+
+    // $http.get('http://mlollo.rmorpheus.enseirb.fr:80/users/getpseudo')
+    // $http.get('http://localhost:8080/users/getpseudo')
+    $http.get('http://cb78b46a.ngrok.io/users/getpseudo')
         .success(function(response){console.log(response);$scope.pseudolist = response;$scope.popover.show($event);
         })
         .error(function(err, config) {console.log(config);});

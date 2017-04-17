@@ -11,10 +11,14 @@ var Application = function(){
   Application.setPosition = function([lat, long]){this.lat = lat;this.long = long;}
   Application.getPosition = function(){return new google.maps.LatLng(this.lat,this.long);}
   Application.setIsLog = function(is){this.isLog = is;
-    if(is == true)
+    if(is == true){
       document.getElementById("btn-login").style.display="none";
-    else
+      document.getElementById("btn-logout").style.display="block";
+    }else{
       document.getElementById("btn-login").style.display="block";
+      document.getElementById("btn-logout").style.display="none";
+      document.getElementById("btn-register").style.display="block";
+    }
   }
   Application.getIsLog = function(){return this.isLog;}
   Application.setIsReg = function(is){this.isReg = is;
