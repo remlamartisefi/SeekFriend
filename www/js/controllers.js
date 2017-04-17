@@ -1,11 +1,16 @@
 angular.module('starter.controllers', ['ngCordova'])
 
+
+
+
 .controller('AppCtrl', function($scope, $ionicModal) {
   
   // Create the login modal that we will use later
   $ionicModal.fromTemplateUrl('templates/login.html', {scope: $scope}).then(function(modal) {$scope.login = modal;});
   $ionicModal.fromTemplateUrl('templates/register.html', {scope: $scope}).then(function(modal) {$scope.register = modal;});
   $ionicModal.fromTemplateUrl('templates/enableGeoloc.html', {scope: $scope}).then(function(modal) {$scope.enableGeoloc = modal;});
+  $ionicModal.fromTemplateUrl('templates/logout.html', {scope: $scope}).then(function(modal) {$scope.logout = modal;});
+
 
   // Triggered in the login or register modal to close it
   $scope.closeLogin = function() {$scope.login.hide();};
@@ -14,14 +19,25 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.openRegister = function() {$scope.register.show();};
   $scope.closeGeo = function() {$scope.enableGeoloc.hide();};
   $scope.openGeo = function() {$scope.enableGeoloc.show();};
+  $scope.closeLogout = function() {$scope.logout.hide();};
+  $scope.openLogout = function() {$scope.logout.show();};
   // Switch Modal View
   $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();}
   $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();}
+  $scope.logout_view = function(){$scope.closeLogout();$scope.openLogout();}
+
 
   // if(Application.getIsReg()){
   //   document.getElementById("btn-register").style.display="none";
   // }
 
+})
+
+
+.controller('LogoutCtrl',function($scope,$timeout,$http){
+$scope.doLogout = function() {
+  $scope.logs = true;
+}
 })
 
 .controller('SignCtrl',function($scope,$timeout,$http){
@@ -33,23 +49,33 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.doLogin = function(loginData) {
     $scope.loginForm.submitted = true;
     console.log('Doing login', $scope.loginData);
+    console.log('email', $scope.loginData.email);
+    console.log('pwd', $scope.loginData.password);
 
-    /*if($scope.loginData.email.split("@").length == 2){
-
-    }else{
-      $scope.email.style = {'color':'red'};
-    }*/
-    // Simulate a login delay. Remove this and replace with your login
-    // code if using a login system
+    var data3 = {
+        email: $scope.loginData.email,
+      }
+    //$http.get('http://0f5ee7ad.ngrok.io/users/getlogin')
+       // .success(function(response){
+          //$scope.login = response;
+          //console.log('reponse du get', $scope.login);
+          if($scope.loginData.email == 'remimi@gmail.com' && $scope.loginData.password == 'aouie'){
+            console.log('apres le if');
+            $scope.closeLogin();    
+            Application.setIsLog(true);
+          }else{
+             console.log('failed');
+            $scope.registerForm.$error = false;
+          }
+        //}).error(function(err, config) {console.log(config);}); 
+          //console.log(response);     
     $timeout(function() {
       $scope.closeLogin();
     }, 60000);
   };
 
-
   $scope.doRegister = function() {
     $scope.registerForm.submitted = true;
-
     var data = {
       email : $scope.registerData.email,
       pseudo : $scope.registerData.pseudo,
@@ -69,7 +95,7 @@ angular.module('starter.controllers', ['ngCordova'])
         email : $scope.registerData.email,
         pseudo : $scope.registerData.pseudo,
       }
-      $http.post('http://9048a111.ngrok.io/users/getbyemailnpseudo', data2)
+      $http.post('http://0f5ee7ad.ngrok.io/users/getbyemailnpseudo', data2)
         .success(function(response){
           //console.log(response);
           if(response.length == 0){
@@ -77,21 +103,20 @@ angular.module('starter.controllers', ['ngCordova'])
             $http.defaults.headers.post["Content-Type"] = "application/json";
 
             // Mettre l'adresse du ngrok qui change souvant
-            $http.post('http://9048a111.ngrok.io/users/add', data)
+            $http.post('http://0f5ee7ad.ngrok.io/users/add', data)
               .success(function(response){
                 //console.log(response);
                 Application.setIsReg(true);
-                Application.setIsLog(true);
                 Application.setEmail(data.email);
                 Application.setPseudo(data.pseudo);
                 
-                 $http.post('http://9048a111.ngrok.io/users/getbyemailnpseudo', data2)
+                 $http.post('http://0f5ee7ad.ngrok.io/users/getbyemailnpseudo', data2)
                     .success(function(response){
                       //console.log(response);
                       Application.setUser_id(response._id);
                     }).error(function(err, config) {console.log(config);});
                 $scope.closeRegister();    
-                Application.setIsLog(true);
+                $scope.logs = false;
               }).error(function(err, config) {console.log(config);});
           }else{
             $scope.registerForm.$error = false;
@@ -119,6 +144,9 @@ angular.module('starter.controllers', ['ngCordova'])
 })
 
 
+
+
+
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation,$ionicLoading,$ionicPlatform) {
   $ionicPlatform.ready(function(){
     $ionicLoading.show({
@@ -144,7 +172,7 @@ angular.module('starter.controllers', ['ngCordova'])
           $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
         }
       });
-      // $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
       $ionicLoading.hide(); 
 
       google.maps.event.addListenerOnce($scope.map, 'idle', function(){
@@ -214,8 +242,11 @@ angular.module('starter.controllers', ['ngCordova'])
     $http.defaults.headers.common["Accept"] = "application/json";
 
     // Mettre l'adresse du ngrok qui change souvant
-    $http.get('http://9048a111.ngrok.io/users/getpseudo')
-        .success(function(response){console.log(response);$scope.pseudolist = response;$scope.popover.show($event);
+    $http.get('http://0f5ee7ad.ngrok.io/users/getpseudo')
+        .success(function(response){
+          console.log(response);
+          $scope.pseudolist = response;
+          $scope.popover.show($event);
         })
         .error(function(err, config) {console.log(config);});
 
