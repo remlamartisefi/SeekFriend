@@ -45,7 +45,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
   });
 })
 
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, $compileProvider) {
   // $ionicNativeTransitions.enable(true);
   // $ionicNativeTransitionsProvider.setDefaultOptions({
   //   duration: 400, // in milliseconds (ms), default 400,
@@ -66,6 +66,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
   //   type: 'slide',
   //   direction: 'down'
   // });
+  $compileProvider.imgSrcSanitizationWhitelist(/^\s(https|file|blob|cdvfile):|data:image\//);
 
   $stateProvider
 

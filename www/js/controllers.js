@@ -1,16 +1,16 @@
-// var url = 'http://mlollo.rmorpheus.enseirb.fr:80'
+var url = 'http://mlollo.rmorpheus.enseirb.fr'
 // var url = 'http://localhost:8080'
-var url = 'http://6583358e.ngrok.io'
+// var url = 'http://6583358e.ngrok.io'
 
 angular.module('starter.controllers', ['ngCordova'])
 
-.controller('AppCtrl', function($scope, $ionicModal) {
-  
+.controller('AppCtrl', function($scope, $ionicModal, $ionicPopover, $ionicPlatform) {
   // Create the login modal that we will use later
   $ionicModal.fromTemplateUrl('templates/login.html', {scope: $scope}).then(function(modal) {$scope.login = modal;});
   $ionicModal.fromTemplateUrl('templates/register.html', {scope: $scope}).then(function(modal) {$scope.register = modal;});
   $ionicModal.fromTemplateUrl('templates/enableGeoloc.html', {scope: $scope}).then(function(modal) {$scope.enableGeoloc = modal;});
   $ionicModal.fromTemplateUrl('templates/logout.html', {scope: $scope}).then(function(modal) {$scope.logout = modal;});
+  $ionicPopover.fromTemplateUrl('templates/my-popover.html', {scope: $scope}).then(function(popover) {$scope.popover = popover;});
 
   // Triggered in the login or register modal to close it
   $scope.closeLogin = function() {$scope.login.hide();};
@@ -21,6 +21,8 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.openGeo = function() {$scope.enableGeoloc.show();};
   $scope.closeLogout = function() {$scope.logout.hide();};
   $scope.openLogout = function() {$scope.logout.show();};
+  $scope.openPopover = function($event) {$scope.popover.show($event);};
+  $scope.closePopover = function() {$scope.popover.hide();};
   // Switch Modal View
   $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();}
   $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();}
@@ -171,131 +173,128 @@ angular.module('starter.controllers', ['ngCordova'])
 .controller('PlaylistCtrl', function($scope, $stateParams) {
 })
 
-
-
-
-
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation,$ionicLoading,$ionicPlatform) {
-  $ionicPlatform.ready(function(){
-    $ionicLoading.show({
-        template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
-    });
-
-      
-    var options = {timeout: 10000, enableHighAccuracy: true,maximumAge: 0}; 
-    $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
-      var geocoder = new google.maps.Geocoder();
-      var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-      Application.setPosition([position.coords.latitude, position.coords.longitude]);
-      var coord = new google.maps.LatLng(47.389982, 0.688877);
-
-      var mapOptions = {
-        center: latLng,
-        zoom: 15,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-      };
-
-      geocoder.geocode({'latLng': latLng}, function (results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
-          $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-          google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-            var marker = new google.maps.Marker({
-                map: $scope.map,
-                animation: google.maps.Animation.DROP,
-                position: latLng
-            });  
-
-            var marker2 = new google.maps.Marker({
-                map: $scope.map,
-                animation: google.maps.Animation.DROP,
-                position: coord
-            });      
-
-            var infoWindow = new google.maps.InfoWindow({
-                content: "Here I am!"
-            });
-
-            google.maps.event.addListener(marker2, 'click', function () {
-                infoWindow.open($scope.map, marker2);
-            }); 
-
-          });
-        }
-      });
-      
-    
-        // $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-      // $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-      $ionicLoading.hide(); 
-      //Wait until the map is loaded
-    }, function(error){
-      console.log("Could not get location");
-      console.log(error);
-      GeolocationSync(Application);
-      $ionicLoading.hide();
-    });    
-  });
-
-  $scope.refreshGeo = function(){
-    GeolocationSync(Application);
-  }
-
+.controller('MapCtrl', function($scope) {
+    $scope.refreshMap();
 })
 
-.controller('MenuCtrl', function($scope, $ionicPopup, $ionicHistory, $state, $ionicPopover,$http) {
+.controller('MenuCtrl', function($scope, $ionicPopup, $ionicHistory, $ionicPlatform, $cordovaGeolocation,$ionicLoading, $state, $interval, $ionicPopover,$http) {
   $scope.settings = function() {
-    if($ionicHistory.currentView().url != "/app/settings"){
+    if($ionicHistory.currentView().url != "/app/settings")
       // $ionicConfig.views.transition('platform');
       $state.go('app.settings');
-    }else{
+    else
       $ionicHistory.goBack();
-    }
   }; 
-
-  //Popover
-  // .fromTemplate() method
-  var template = '<ion-popover-view><ion-header-bar> <h1 class="title">My Popover Title</h1> </ion-header-bar> <ion-content> Hello! </ion-content></ion-popover-view>';
-
-  $scope.popover = $ionicPopover.fromTemplate(template, {
-   scope: $scope
-  });
-
-  // .fromTemplateUrl() method
-  $ionicPopover.fromTemplateUrl('templates/my-popover.html', {
-    scope: $scope
-  }).then(function(popover) {
-    $scope.popover = popover;
-  });
-
-  $scope.openPopover = function($event) {
+  
+  $scope.reloadFriendsList = function() {
     $http.defaults.headers.common["Accept"] = "application/json";
     $http.get(url + '/users/getpseudo')
-        .success(function(response){console.log(response);$scope.pseudolist = response;$scope.popover.show($event);
-        })
-        .error(function(err, config) {console.log(config);});
+    .success(function(response){console.log(response);$scope.pseudolist = response;})
+    .error(function(err, config) {console.log(config);});
+  };
+  $scope.reloadFriendsList();
+  var theInterval = $interval(function(){
+      $scope.reloadFriendsList();
+  }.bind(this), 30000);   
+   
 
-  };
-  $scope.closePopover = function() {
-    $scope.popover.hide();
-  };
-  //Cleanup the popover when we're documentne with it!
-  $scope.$on('$destroy', function() {
-    $scope.popover.remove();
-  });
-  // Execute action on hidden popover
-  $scope.$on('popover.hidden', function() {
-    // Execute action
-  });
-  // Execute action on remove popover
-  $scope.$on('popover.removed', function() {
-    // Execute action
-  });
-  // Execute hide popover
-  // $scope.$on('popover.hidden', function() {
-  //   document.getElementById("popover").$on('click',function(){
-  //     $scope.popover.hide();
-  //   });
+  // //Cleanup the popover when we're documentne with it!
+  // $scope.$on('$destroy', function() {
+  //   $scope.popover.remove();
   // });
+  // // Execute action on hidden popover
+  // $scope.$on('popover.hidden', function() {
+  //   // Execute action
+  // });
+  // // Execute action on remove popover
+  // $scope.$on('popover.removed', function() {
+  //   // Execute action
+  // });
+  // refreshGeoloca for mapCtrl
+  $scope.refreshMap = function(){
+    $ionicPlatform.ready(function(){
+      $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
+      var options = {timeout: 100000, enableHighAccuracy: true,maximumAge: 0}; 
+      $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+        var geocoder = new google.maps.Geocoder();
+        var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        Application.setPosition([position.coords.latitude, position.coords.longitude]);
+        var coord = new google.maps.LatLng(47.389982, 0.688877);
+        var mapOptions = {
+          center: latLng,
+          zoom: 19,
+          fullscreenControl: true,
+          mapTypeControl: true,
+          mapTypeControlOptions: {
+              style: google.maps.MapTypeControlStyle.DEFAULT,
+              position: google.maps.ControlPosition.LEFT_TOP
+          },
+          motionTrackingControl: true,
+          motionTrackingControlOptions: {
+            // style: google.maps.MapTypeControlStyle.DEFAULT,
+            position: google.maps.ControlPosition.RIGHT_BOTTOM
+          },
+          PanControl: true,
+          PanControlOptions: {
+            // style: google.maps.MapTypeControlStyle.DEFAULT,
+            position: google.maps.ControlPosition.RIGHT_BOTTOM
+          },
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        geocoder.geocode({'latLng': latLng}, function (results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            $scope.map.setClickableIcons(true);
+            var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(0, 0), new google.maps.Size(16,16));
+            google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+              $scope.marker = new google.maps.Marker({
+                  map: $scope.map,
+                  animation: google.maps.Animation.BOUNCE,
+                  position: latLng,
+                  icon: pinImage
+              });
+            });
+            google.maps.event.addListener($scope.map, 'idle', function(){
+              $scope.marker.setMap(null);
+              $scope.marker = new google.maps.Marker({
+                  map: $scope.map,
+                  animation: google.maps.Animation.BOUNCE,
+                  position: latLng,
+                  icon: pinImage
+              });  
+            });
+            // var infoWindow = new google.maps.InfoWindow({content: "Here I am!"});
+            // google.maps.event.addListener($scope.marker, 'click', function () {infoWindow.open($scope.map, marker2);}); 
+          }
+        });
+        $ionicLoading.hide(); 
+      }, function(error){console.log("Could not get location");console.log(error);$ionicLoading.hide();});
+    });
+  }
+
+  $scope.refreshLoc = function(){
+    $ionicPlatform.ready(function(){
+      $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
+      var options = {timeout: 100000, enableHighAccuracy: true,maximumAge: 0}; 
+      var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(0, 0), new google.maps.Size(16,16));
+      $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+        var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        google.maps.event.addListener($scope.map, 'idle', function(){
+          $scope.marker.setMap(null);
+          $scope.marker = new google.maps.Marker({
+              map: $scope.map,
+              animation: google.maps.Animation.BOUNCE,
+              position: latLng,
+              icon: pinImage
+          });  
+        });
+        $scope.map.setCenter(latLng);  
+        $ionicLoading.hide(); 
+      },function(error){console.log("Could not get location");console.log(error);
+        $ionicLoading.hide();
+      }); 
+    });
+  }
 });
 
 
