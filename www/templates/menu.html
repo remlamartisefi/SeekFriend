@@ -3,17 +3,16 @@
     <ion-nav-bar class="bar-dark" >
       <ion-nav-back-button>
       </ion-nav-back-button>
-
       <ion-nav-buttons side="left">
         <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
         </button>
       </ion-nav-buttons>
       <ion-nav-buttons side="right">
-        <script type="text/javascript">btnLogin = false;</script>
+        <!-- <script type="text/javascript">btnLogin = false;</script> -->
         <a ng-show="!btnLogin" class="button button-icon icon ion-log-in" ng-click="openLogin()"></a>
         <a ng-show="btnLogin" class="button button-icon icon ion-log-out" ng-click="openLogout()"></a>
-        <a class="button button-icon icon ion-person" ng-click="openPopover($event)"></a>
-        <a class="button button-icon icon ion-android-locate" ng-click="refreshLoc()"></a>
+        <!-- <a class="button button-icon icon ion-person" ng-click="openPopover($event)"></a> -->
+        <a class="button button-icon icon ion-android-locate" ng-click="refreshLoc(false)"></a>
         <a class="button button-icon icon ion-android-settings" ng-click="settings()"></a>
       </ion-nav-buttons>
 
@@ -30,12 +29,12 @@
 <!--         <ion-item menu close>
           <input type="search" placeholder="Search..." ng-model="search" ng-focus="searchFocused = true" ng-blur="searchFocused = false" ng-change="scrollTop()" class="full-width" close>
             <button ng-if="search.length" class="button button-icon ion-android-close input-button" ng-click="clearSearch()"></button>
-        </ion-item> -->
+        </ion-item>
         <ion-searchbar menu close ng-model="search"
           showCancelButton="shouldShowCancel"
           ionInput="onInput($event)"
           ionCancel="onCancel($event)">
-        </ion-searchbar
+        </ion-searchbar> -->
          <ion-item menu close ng-repeat="user in pseudolist" ng-click="openPopover()">
           {{user.pseudo}}
         </ion-item>

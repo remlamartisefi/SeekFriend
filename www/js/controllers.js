@@ -1,4 +1,4 @@
-var url = 'http://mlollo.rmorpheus.enseirb.fr'
+var url = 'http://mlollo.rmorpheus.enseirb.fr:8080'
 // var url = 'http://localhost:8080'
 // var url = 'http://6583358e.ngrok.io'
 
@@ -198,73 +198,49 @@ angular.module('starter.controllers', ['ngCordova'])
   }.bind(this), 30000);   
    
 
-  // //Cleanup the popover when we're documentne with it!
-  // $scope.$on('$destroy', function() {
-  //   $scope.popover.remove();
-  // });
-  // // Execute action on hidden popover
-  // $scope.$on('popover.hidden', function() {
-  //   // Execute action
-  // });
-  // // Execute action on remove popover
-  // $scope.$on('popover.removed', function() {
-  //   // Execute action
-  // });
-  // refreshGeoloca for mapCtrl
+  var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(0, 0), new google.maps.Size(16,16));
+  var contentString = 
+                '<div id=\"marker_content\">' +
+                  'Add this location' + 
+                  '<button class="button button-positive" onclick=\"addLocation()\">Add</button>'
+                '</div>';
+  var infoWindow = new google.maps.InfoWindow({content: contentString});
+  var options = {timeout: 100000, enableHighAccuracy: true,maximumAge: 0}; 
+  // var $scope.marker[];
+
   $scope.refreshMap = function(){
     $ionicPlatform.ready(function(){
       $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
-      var options = {timeout: 100000, enableHighAccuracy: true,maximumAge: 0}; 
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var geocoder = new google.maps.Geocoder();
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         Application.setPosition([position.coords.latitude, position.coords.longitude]);
-        var coord = new google.maps.LatLng(47.389982, 0.688877);
         var mapOptions = {
           center: latLng,
-          zoom: 19,
-          fullscreenControl: true,
-          mapTypeControl: true,
-          mapTypeControlOptions: {
-              style: google.maps.MapTypeControlStyle.DEFAULT,
-              position: google.maps.ControlPosition.LEFT_TOP
-          },
-          motionTrackingControl: true,
-          motionTrackingControlOptions: {
-            // style: google.maps.MapTypeControlStyle.DEFAULT,
-            position: google.maps.ControlPosition.RIGHT_BOTTOM
-          },
-          PanControl: true,
-          PanControlOptions: {
-            // style: google.maps.MapTypeControlStyle.DEFAULT,
-            position: google.maps.ControlPosition.RIGHT_BOTTOM
-          },
+          zoom: 17,
           mapTypeId: google.maps.MapTypeId.ROADMAP
         };
         geocoder.geocode({'latLng': latLng}, function (results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
             $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
             $scope.map.setClickableIcons(true);
-            var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(0, 0), new google.maps.Size(16,16));
             google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-              $scope.marker = new google.maps.Marker({
+              $scope.location = new google.maps.Marker({
                   map: $scope.map,
-                  animation: google.maps.Animation.BOUNCE,
                   position: latLng,
                   icon: pinImage
               });
+              google.maps.event.addListener($scope.location, 'click', function () {infoWindow.open($scope.map, $scope.location);}); 
             });
             google.maps.event.addListener($scope.map, 'idle', function(){
-              $scope.marker.setMap(null);
-              $scope.marker = new google.maps.Marker({
+              $scope.location.setMap(null);
+              $scope.location = new google.maps.Marker({
                   map: $scope.map,
-                  animation: google.maps.Animation.BOUNCE,
                   position: latLng,
                   icon: pinImage
-              });  
+              });
+              google.maps.event.addListener($scope.location, 'click', function () {infoWindow.open($scope.map, $scope.location);}); 
             });
-            // var infoWindow = new google.maps.InfoWindow({content: "Here I am!"});
-            // google.maps.event.addListener($scope.marker, 'click', function () {infoWindow.open($scope.map, marker2);}); 
           }
         });
         $ionicLoading.hide(); 
@@ -272,29 +248,50 @@ angular.module('starter.controllers', ['ngCordova'])
     });
   }
 
-  $scope.refreshLoc = function(){
+  $scope.refreshLoc = function(panTo){
     $ionicPlatform.ready(function(){
-      $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
-      var options = {timeout: 100000, enableHighAccuracy: true,maximumAge: 0}; 
-      var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(0, 0), new google.maps.Size(16,16));
+      // $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        Application.setPosition([position.coords.latitude, position.coords.longitude]);
         google.maps.event.addListener($scope.map, 'idle', function(){
-          $scope.marker.setMap(null);
-          $scope.marker = new google.maps.Marker({
+          $scope.location.setMap(null);
+          $scope.location = new google.maps.Marker({
               map: $scope.map,
-              animation: google.maps.Animation.BOUNCE,
               position: latLng,
               icon: pinImage
           });  
+          google.maps.event.addListener($scope.location, 'click', function () {infoWindow.open($scope.map, $scope.location);}); 
         });
-        $scope.map.setCenter(latLng);  
-        $ionicLoading.hide(); 
+        if(panTo)
+          $scope.map.panTo(latLng);
+        // $scope.map.setCenter(latLng);  
+        // $ionicLoading.hide(); 
       },function(error){console.log("Could not get location");console.log(error);
-        $ionicLoading.hide();
+        // $ionicLoading.hide();
       }); 
     });
   }
+
+  // $scope.addLocation = function(){
+  //   $ionicPlatform.ready(function(){
+  //     $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+  //       var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+  //       google.maps.event.addListener($scope.map, 'idle', function(){
+  //         $scope.marker.add(new google.maps.Marker({
+  //             map: $scope.map,
+  //             position: latLng,
+  //             animation: google.maps.Animation.DROP,
+  //         }));  
+  //       });
+  //     },function(error){console.log("Could not get location");console.log(error);
+  //     }); 
+  //   });
+  // }
+
+  var theInterval = $interval(function(){
+      $scope.refreshLoc(true);
+  }.bind(this), 5000); 
 });
 
 
@@ -397,3 +394,28 @@ angular.module('starter.controllers', ['ngCordova'])
   // }, (err) => {
   //   console.log(err);
   // });
+
+
+
+
+// var mapOptions = {
+//           center: latLng,
+//           zoom: 17,
+//           // fullscreenControl: true,
+//           // mapTypeControl: true,
+//           // mapTypeControlOptions: {
+//           //     style: google.maps.MapTypeControlStyle.DEFAULT,
+//           //     position: google.maps.ControlPosition.LEFT_TOP
+//           // },
+//           // motionTrackingControl: true,
+//           // motionTrackingControlOptions: {
+//           //   // style: google.maps.MapTypeControlStyle.DEFAULT,
+//           //   position: google.maps.ControlPosition.RIGHT_BOTTOM
+//           // },
+//           // PanControl: true,
+//           // PanControlOptions: {
+//           //   // style: google.maps.MapTypeControlStyle.DEFAULT,
+//           //   position: google.maps.ControlPosition.RIGHT_BOTTOM
+//           // },
+//           mapTypeId: google.maps.MapTypeId.ROADMAP
+//         };
