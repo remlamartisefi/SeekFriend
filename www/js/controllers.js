@@ -1,6 +1,6 @@
 // var url = 'http://mlollo.rmorpheus.enseirb.fr:8080'
 // var url = 'http://localhost:8080'
-var url = 'http://645249e5.ngrok.io'
+var url = 'http://8f2b191c.ngrok.io'
 
 angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
@@ -270,57 +270,54 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     .error(function(err, config) {console.log(config);});
   }
 
-  $scope.togglePseudo = function(pseudo) {
-    if ($scope.isPseudoShown(pseudo)) {
-      $scope.shownPseudo = null;
+  $scope.showLocation = function(info){
+    var latLng = new google.maps.LatLng(info.lat, info.lng);
+    $scope.markers.push(new google.maps.Marker({
+        map: $scope.map,
+        position:  latLng,
+        animation: google.maps.Animation.DROP
+    }));
+    console.log($scope.markers[$scope.markers.length - 1]);
+  }
+
+  $scope.toggleUser = function(user) {
+    $scope.markers.forEach(function(value,key){
+      value.setMap(null);
+    });
+    if ($scope.isUserShown(user)) {
+      $scope.shownUser = null;
     } else {
-      $scope.shownPseudo = pseudo;
+      $scope.shownUser = user;
+      $scope.markers = [];
+      user._info.forEach(function(value,key){
+        $scope.showLocation(value);
+      });
     }
-      // for (var j=0; j<pseudo.info.length; j++) {
-      //   pseudo.info[j]
-      // }
   };
-  $scope.isPseudoShown = function(pseudo) {
-    return $scope.shownPseudo === pseudo;
+  $scope.isUserShown = function(user) {
+    return $scope.shownUser === user;
   };
 
   $scope.reloadFriendsList = function() {
     $http.defaults.headers.common["Accept"] = "application/json";
     $http.get(url + '/users/getall')
     .success(function(response){
-      // console.log(response);
-      // $scope.pseudolist = response;
-      $scope.pseudolist = [];
-      for (var i=0; i<response.length; i++) {
-        var data = {
-          user_id: response[i]._id
-        };
-        var user_name = response[i].pseudo;
-        $http.post(url + '/coords/getall',data)
+      $scope.userlist = [];
+      response.forEach(function(value,key){
+        $scope.userlist.push({
+          _user: value,
+          _info: []
+        });
+        $http.post(url + '/coords/getall',{user_id: value._id})
         .success(function(res){
           if(res.length != 0){
-            $scope.result = [];
             for (var j=0; j<res.length; j++) {
-              // console.log(res[j]);
-              $scope.result.push(res[j]);
+              $scope.userlist[key]._info.push(res[j]); 
             }
-            $scope.pseudolist[i] = {
-              name: user_name,
-              info: $scope.result
-            }; 
-            console.log($scope.pseudolist[i]);
-
-          }else{
-             $scope.pseudolist[i] = {
-              name: user_name,
-              info: []
-            };
           }
         }).error(function(err, config) {console.log(config);});
-      }
-      console.log($scope.pseudolist);
-    })
-    .error(function(err, config) {console.log(config);});
+      });
+    }).error(function(err, config) {console.log(config);});
   };
   $scope.reloadFriendsList();
   var theInterval = $interval(function(){

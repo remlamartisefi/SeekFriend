@@ -26,18 +26,18 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <div ng-repeat="pseudo in pseudolist">
+        <div ng-repeat="user in userlist track by $index">
           <ion-item class="item-stable"
-                    ng-click="togglePseudo(pseudo)"
-                    ng-class="{active: isPseudoShown(pseudo)}">
-              <i class="icon" ng-class="isPseudoShown(pseudo) ? 'ion-minus' : 'ion-plus'"></i>
+                    ng-click="toggleUser(user)"
+                    ng-class="{active: isUserShown(user)}">
+              <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
             &nbsp;
-            Pseudo {{pseudo.name}}
+            {{user._user.pseudo}}
           </ion-item>
           <ion-item class="item-accordion"
-                    ng-repeat="info in pseudo.info"
-                    ng-show="isPseudoShown(pseudo)">
-            {{info}}
+                    ng-repeat="info in user._info"
+                    ng-show="isUserShown(user)">
+            {{info.date}}
           </ion-item>
         </div>
       </ion-list>
