@@ -1,16 +1,22 @@
-var url = 'http://mlollo.rmorpheus.enseirb.fr:8080'
+// var url = 'http://mlollo.rmorpheus.enseirb.fr:8080'
 // var url = 'http://localhost:8080'
-// var url = 'http://6583358e.ngrok.io'
+var url = 'http://645249e5.ngrok.io'
 
-angular.module('starter.controllers', ['ngCordova'])
+angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
-.controller('AppCtrl', function($scope, $ionicModal, $ionicPopover, $ionicPlatform) {
+.controller('AppCtrl', function($scope, $ionicModal, $ionicPopover, $ionicPlatform, $localStorage) {
   // Create the login modal that we will use later
+  $scope.$storage = $localStorage;
+  if("undefined" === typeof $scope.$storage.islog)
+    $scope.$storage.islog = false;
+  if("undefined" === typeof $scope.$storage.isreg)
+    $scope.$storage.isreg = false;
+
   $ionicModal.fromTemplateUrl('templates/login.html', {scope: $scope}).then(function(modal) {$scope.login = modal;});
   $ionicModal.fromTemplateUrl('templates/register.html', {scope: $scope}).then(function(modal) {$scope.register = modal;});
   $ionicModal.fromTemplateUrl('templates/enableGeoloc.html', {scope: $scope}).then(function(modal) {$scope.enableGeoloc = modal;});
   $ionicModal.fromTemplateUrl('templates/logout.html', {scope: $scope}).then(function(modal) {$scope.logout = modal;});
-  $ionicPopover.fromTemplateUrl('templates/my-popover.html', {scope: $scope}).then(function(popover) {$scope.popover = popover;});
+  // $ionicPopover.fromTemplateUrl('templates/my-popover.html', {scope: $scope}).then(function(popover) {$scope.popover = popover;});
 
   // Triggered in the login or register modal to close it
   $scope.closeLogin = function() {$scope.login.hide();};
@@ -21,28 +27,30 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.openGeo = function() {$scope.enableGeoloc.show();};
   $scope.closeLogout = function() {$scope.logout.hide();};
   $scope.openLogout = function() {$scope.logout.show();};
-  $scope.openPopover = function($event) {$scope.popover.show($event);};
-  $scope.closePopover = function() {$scope.popover.hide();};
+  // $scope.openPopover = function($event) {$scope.popover.show($event);};
+  // $scope.closePopover = function() {$scope.popover.hide();};
   // Switch Modal View
   $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();}
   $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();}
   $scope.logout_view = function(){$scope.closeLogout();$scope.openLogout();}
 
   $scope.btn_login = function(){
-    if(Application.getIsLog())
+    if($scope.$storage.islog)
       $scope.btnLogin = true;
     else 
       $scope.btnLogin = false;
   }
   $scope.btn_register = function(){
-    if(Application.getIsReg())
+    if($scope.$storage.isreg)
       $scope.btnRegister = true;
     else 
       $scope.btnRegister = false;
   }
+  $scope.btn_login();
+  $scope.btn_register();
 })
 
-.controller('SignCtrl',function($scope,$timeout,$http){
+.controller('SignCtrl',function($scope,$timeout,$http, $sessionStorage){
   // Form data for the login modal
   $scope.loginData = {};
   $scope.registerData = {};
@@ -53,7 +61,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
     var data = {
       email : $scope.loginData.email
-    }
+    };
 
     if($scope.loginForm.submitted 
       && !$scope.loginForm.Email.$invalid 
@@ -67,16 +75,17 @@ angular.module('starter.controllers', ['ngCordova'])
       $http.post(url + '/users/getbyemail', data)
         .success(function(response){
           if(response.length == 1 && response[0].password == $scope.loginData.password){
-            Application.setEmail(response[0].email);
-            Application.setPseudo(response[0].pseudo);
-            Application.setUser_id(response[0]._id);
-            console.log('Doing Login');
+            // $cookieStore.put('email',response[0].email);
+            $scope.$storage.email = response[0].email;
+            $scope.$storage.pseudo = response[0].pseudo;
+            $scope.$storage.user_id = response[0]._id;
             $http.defaults.headers.post["Content-Type"] = "application/json";
 
             $http.post(url + '/users/login', data)
               .success(function(response){
-                console.log(response);
-                Application.setIsLog(true);
+                console.log('Doing Login');
+                // console.log(response);
+                $scope.$storage.islog = true;
                 $scope.btn_login();
                 $scope.closeLogin();
               }).error(function(err, config) {console.log(config);});
@@ -92,16 +101,16 @@ angular.module('starter.controllers', ['ngCordova'])
 
   $scope.doLogout = function() {
      var data = {
-        email : Application.getEmail()
-      }
+        email : $scope.$storage.email
+      };
       console.log(data);
     $http.defaults.headers.post["Content-Type"] = "application/json";
     $http.post(url + '/users/logout', data)
       .success(function(response){
         console.log('Doing Logout');
-        console.log(response);
-        Application.setIsLog(false);
-        Application.setIsReg(false);
+        // console.log(response);
+        $scope.$storage.islog = false;
+        $scope.$storage.isreg = false;
         $scope.btn_login();
         $scope.btn_register();
         $scope.closeLogout();
@@ -114,7 +123,7 @@ angular.module('starter.controllers', ['ngCordova'])
       email : $scope.registerData.email,
       pseudo : $scope.registerData.pseudo,
       password : $scope.registerData.password
-    }
+    };
     if($scope.registerForm.submitted 
       && !$scope.registerForm.Email.$invalid 
       && !$scope.registerForm.Email.$error.email 
@@ -134,19 +143,10 @@ angular.module('starter.controllers', ['ngCordova'])
 
             $http.post(url + '/users/add', data)
               .success(function(response){
-                //console.log(response);
-                Application.setIsReg(true);
-                // Application.setIsLog(true);
-                Application.setEmail(data.email);
-                Application.setPseudo(data.pseudo);
-                
-                 $http.post(url + '/users/getbyemailnpseudo', data)
-                    .success(function(response){
-                      //console.log(response);
-                      Application.setUser_id(response[0]._id);
-                      $scope.btn_register();
-                      $scope.closeRegister(); 
-                    }).error(function(err, config) {console.log(config);});
+                // console.log(response);
+                $scope.$storage.isreg = true;
+                $scope.btn_register();
+                $scope.closeRegister(); 
               }).error(function(err, config) {console.log(config);});
           }else{
             $scope.registerForm.$error = false;
@@ -174,10 +174,10 @@ angular.module('starter.controllers', ['ngCordova'])
 })
 
 .controller('MapCtrl', function($scope) {
-    $scope.refreshMap();
+  $scope.refreshMap();
 })
 
-.controller('MenuCtrl', function($scope, $ionicPopup, $ionicHistory, $ionicPlatform, $cordovaGeolocation,$ionicLoading, $state, $interval, $ionicPopover,$http) {
+.controller('MenuCtrl', function($scope, $ionicPopup, $ionicHistory, $ionicPlatform, $cordovaGeolocation,$ionicLoading, $state, $interval, $ionicPopover,$http,$sessionStorage) {
   $scope.settings = function() {
     if($ionicHistory.currentView().url != "/app/settings")
       // $ionicConfig.views.transition('platform');
@@ -185,36 +185,17 @@ angular.module('starter.controllers', ['ngCordova'])
     else
       $ionicHistory.goBack();
   }; 
-  
-  $scope.reloadFriendsList = function() {
-    $http.defaults.headers.common["Accept"] = "application/json";
-    $http.get(url + '/users/getpseudo')
-    .success(function(response){console.log(response);$scope.pseudolist = response;})
-    .error(function(err, config) {console.log(config);});
-  };
-  $scope.reloadFriendsList();
-  var theInterval = $interval(function(){
-      $scope.reloadFriendsList();
-  }.bind(this), 30000);   
-   
 
-  var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(0, 0), new google.maps.Size(16,16));
-  var contentString = 
-                '<div id=\"marker_content\">' +
-                  'Add this location' + 
-                  '<button class="button button-positive" onclick=\"addLocation()\">Add</button>'
-                '</div>';
-  var infoWindow = new google.maps.InfoWindow({content: contentString});
+  var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(8, 8), new google.maps.Size(16,16));
   var options = {timeout: 100000, enableHighAccuracy: true,maximumAge: 0}; 
-  // var $scope.marker[];
 
   $scope.refreshMap = function(){
     $ionicPlatform.ready(function(){
-      $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
+      $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location !'});
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var geocoder = new google.maps.Geocoder();
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        Application.setPosition([position.coords.latitude, position.coords.longitude]);
+        $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         var mapOptions = {
           center: latLng,
           zoom: 17,
@@ -230,192 +211,148 @@ angular.module('starter.controllers', ['ngCordova'])
                   position: latLng,
                   icon: pinImage
               });
-              google.maps.event.addListener($scope.location, 'click', function () {infoWindow.open($scope.map, $scope.location);}); 
-            });
-            google.maps.event.addListener($scope.map, 'idle', function(){
-              $scope.location.setMap(null);
-              $scope.location = new google.maps.Marker({
-                  map: $scope.map,
-                  position: latLng,
-                  icon: pinImage
-              });
-              google.maps.event.addListener($scope.location, 'click', function () {infoWindow.open($scope.map, $scope.location);}); 
             });
           }
         });
         $ionicLoading.hide(); 
-      }, function(error){console.log("Could not get location");console.log(error);$ionicLoading.hide();});
+      }, function(error){console.log("Could not get location");console.log(error);$ionicLoading.hide();$scope.openGeo();});
     });
   }
 
   $scope.refreshLoc = function(panTo){
     $ionicPlatform.ready(function(){
+      // console.log('refresh');
       // $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
+        var geocoder = new google.maps.Geocoder();
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        Application.setPosition([position.coords.latitude, position.coords.longitude]);
-        google.maps.event.addListener($scope.map, 'idle', function(){
-          $scope.location.setMap(null);
-          $scope.location = new google.maps.Marker({
-              map: $scope.map,
-              position: latLng,
-              icon: pinImage
-          });  
-          google.maps.event.addListener($scope.location, 'click', function () {infoWindow.open($scope.map, $scope.location);}); 
-        });
-        if(panTo)
-          $scope.map.panTo(latLng);
-        // $scope.map.setCenter(latLng);  
-        // $ionicLoading.hide(); 
-      },function(error){console.log("Could not get location");console.log(error);
-        // $ionicLoading.hide();
-      }); 
+        $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        geocoder.geocode({'latLng': latLng}, function (results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+              $scope.location.setMap(null);
+              $scope.location = new google.maps.Marker({
+                  map: $scope.map,
+                  position: latLng,
+                  icon: pinImage
+              });  
+            });
+            if(panTo)
+              $scope.map.panTo(latLng);
+          }
+        })
+      },function(error){console.log("Could not get location");console.log(error);}); 
     });
   }
+
+  var theInterval = $interval(function(){
+      $scope.refreshLoc(true);
+  }.bind(this), 1000); 
+
+  $scope.markers = [];
+  $scope.addLocation = function(){
+    var latLng = new google.maps.LatLng($scope.location.position.lat(), $scope.location.position.lng());
+    $scope.markers.push(new google.maps.Marker({
+        map: $scope.map,
+        position:  latLng,
+        animation: google.maps.Animation.DROP
+    }));
+    console.log($scope.markers[$scope.markers.length - 1]);
+    var data = {
+      user_id: $scope.$storage.user_id,
+      lat: $scope.location.position.lat(),
+      lng: $scope.location.position.lng(),
+      date: new Date().toLocaleString()
+    };
+    console.log(data);
+    $http.post(url + '/coords/add', data)
+    .success(function(response){console.log('Adding a Coord');console.log(response);})
+    .error(function(err, config) {console.log(config);});
+  }
+
+  $scope.togglePseudo = function(pseudo) {
+    if ($scope.isPseudoShown(pseudo)) {
+      $scope.shownPseudo = null;
+    } else {
+      $scope.shownPseudo = pseudo;
+    }
+      // for (var j=0; j<pseudo.info.length; j++) {
+      //   pseudo.info[j]
+      // }
+  };
+  $scope.isPseudoShown = function(pseudo) {
+    return $scope.shownPseudo === pseudo;
+  };
+
+  $scope.reloadFriendsList = function() {
+    $http.defaults.headers.common["Accept"] = "application/json";
+    $http.get(url + '/users/getall')
+    .success(function(response){
+      // console.log(response);
+      // $scope.pseudolist = response;
+      $scope.pseudolist = [];
+      for (var i=0; i<response.length; i++) {
+        var data = {
+          user_id: response[i]._id
+        };
+        var user_name = response[i].pseudo;
+        $http.post(url + '/coords/getall',data)
+        .success(function(res){
+          if(res.length != 0){
+            $scope.result = [];
+            for (var j=0; j<res.length; j++) {
+              // console.log(res[j]);
+              $scope.result.push(res[j]);
+            }
+            $scope.pseudolist[i] = {
+              name: user_name,
+              info: $scope.result
+            }; 
+            console.log($scope.pseudolist[i]);
+
+          }else{
+             $scope.pseudolist[i] = {
+              name: user_name,
+              info: []
+            };
+          }
+        }).error(function(err, config) {console.log(config);});
+      }
+      console.log($scope.pseudolist);
+    })
+    .error(function(err, config) {console.log(config);});
+  };
+  $scope.reloadFriendsList();
+  var theInterval = $interval(function(){
+      $scope.reloadFriendsList();
+  }.bind(this), 30000);   
+
+  $scope.showCookies = function(){
+    console.log($scope.$storage);
+  }
+
+});
+
+  // var contentString = 
+  //               '<div id=\"marker_content\" style=\"width:100px;overflow:hidden;\">' +
+  //                 'Add this location  ' + 
+  //                 '<button class=\"button button-positive\" onclick=\"addLocation()\">Add</button>'
+  //               '</div>';
+  // $scope.infoWindow = new google.maps.InfoWindow();
+  // $scope.infoWindow.setContent(contentString);
 
   // $scope.addLocation = function(){
   //   $ionicPlatform.ready(function(){
   //     $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
   //       var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
   //       google.maps.event.addListener($scope.map, 'idle', function(){
-  //         $scope.marker.add(new google.maps.Marker({
+  //         $scope.marker = new google.maps.Marker({
   //             map: $scope.map,
   //             position: latLng,
   //             animation: google.maps.Animation.DROP,
-  //         }));  
+  //         });  
   //       });
   //     },function(error){console.log("Could not get location");console.log(error);
   //     }); 
   //   });
   // }
-
-  var theInterval = $interval(function(){
-      $scope.refreshLoc(true);
-  }.bind(this), 5000); 
-});
-
-
-
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  // var geo = {};
-  // $scope.$on('$ionicView.enter', function(e) {
-  //       geo = google.maps.Geocoder();
-  // });
- 
- //alert////////////////////////////////////:
-     // $scope.settings = function() {
-    //  var alertPopup = $ionicPopup.alert({
-    //    title: 'Alert',
-    //    template: JSON.stringify($ionicHistory.currentView())
-    //  });
-    //   alertPopup.then(function(res) {
-    //     console.log('Thank you for not eating my delicious ice cream cone');
-    //   });
-    // };
-
-
-
-// Marker /////////////////////////////////:::::
-// function ts_newMapMarker($marker, map)
-// {
-
-//     var marker;
-
-//     var dataCountry = $marker.attr('data-country');
-//     console.log("Country: " + dataCountry);
-
-//     geocoder = new google.maps.Geocoder();
-//     function getCountry(country) {
-//         geocoder.geocode( { 'address': country }, function(results, status) {
-//             if (status == google.maps.GeocoderStatus.OK) {
-//                 map.setCenter(results[0].geometry.location);
-//                 marker = new google.maps.Marker({
-//                     map: map,
-//                     position: results[0].geometry.location,
-//                     icon    : '<?php bloginfo('template_url'); ?>/assets/images/map-marker.png'
-//                 });
-
-//                 map.markers.push( marker );
-
-//                 getCountry(dataCountry);
-
-//                 // if marker contains HTML, add it to an infoWindow
-//                 if($marker.html())
-//                 {
-//                     // create info window
-//                     var infowindow = new google.maps.InfoWindow({
-//                         content     : $marker.html()
-//                     });
-
-//                     // show info window when marker is clicked
-//                     google.maps.event.addListener(marker, 'click', function() {
-//                         console.log("open info window");
-//                         infowindow.open( map, marker );
-//                     });
-//                 }
-//             } else {
-//                 alert("Geocode was not successful for the following reason: " + status);
-//             }
-//         });
-//     }
-
-// }
-
-
-
-
- // function addInfoWindow(marker, content) {
-  //   let infoWindow = new google.maps.InfoWindow({
-  //     content: content
-  //   });
-  //   google.maps.event.addListener(marker, 'click', () => {
-  //     infoWindow.open($scope.map, marker);
-  //   });
-  // }
-
-  // $cordovaGeolocation.watchPosition().subscribe((position) => {
-  //   var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-
-  //   var marker = new google.maps.Marker({
-  //     map: $scope.map,
-  //     icon: new google.maps.MarkerImage('//maps.gstatic.com/mapfiles/mobile/mobileimgs2.png',
-  //       new google.maps.Size(22, 22),
-  //       new google.maps.Point(0, 18),
-  //       new google.maps.Point(11, 11)),
-  //     position: latLng
-  //   });
-
-  //   let content = "<h4>You are here</h4>";
-  //   this.addInfoWindow(marker, content);
-
-  // }, (err) => {
-  //   console.log(err);
-  // });
-
-
-
-
-// var mapOptions = {
-//           center: latLng,
-//           zoom: 17,
-//           // fullscreenControl: true,
-//           // mapTypeControl: true,
-//           // mapTypeControlOptions: {
-//           //     style: google.maps.MapTypeControlStyle.DEFAULT,
-//           //     position: google.maps.ControlPosition.LEFT_TOP
-//           // },
-//           // motionTrackingControl: true,
-//           // motionTrackingControlOptions: {
-//           //   // style: google.maps.MapTypeControlStyle.DEFAULT,
-//           //   position: google.maps.ControlPosition.RIGHT_BOTTOM
-//           // },
-//           // PanControl: true,
-//           // PanControlOptions: {
-//           //   // style: google.maps.MapTypeControlStyle.DEFAULT,
-//           //   position: google.maps.ControlPosition.RIGHT_BOTTOM
-//           // },
-//           mapTypeId: google.maps.MapTypeId.ROADMAP
-//         };
