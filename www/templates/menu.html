@@ -8,10 +8,10 @@
         </button>
       </ion-nav-buttons>
       <ion-nav-buttons side="right">
-        <a ng-show="!btnLogin" class="button button-icon icon ion-log-in" ng-click="openLogin()"></a>
-        <a ng-show="btnLogin" class="button button-icon icon ion-log-out" ng-click="openLogout()"></a>
-        <a ng-show="btnLogin" class="button button-icon icon ion-plus-round" ng-click="addLocation()"></a>
-        <a class="button button-icon icon ion-briefcase" ng-click="showCookies()"></a>
+        <a ng-show="!$storage.islog" class="button button-icon icon ion-log-in" ng-click="openLogin()"></a>
+        <a ng-show="$storage.islog" class="button button-icon icon ion-log-out" ng-click="openLogout()"></a>
+        <a ng-show="$storage.islog" class="button button-icon icon ion-plus-round" ng-click="addLocation()"></a>
+        <a class="button button-icon icon ion-briefcase" ng-click="showStorage($event)"></a>
         <a class="button button-icon icon ion-android-locate" ng-click="refreshLoc(true)"></a>
         <a class="button button-icon icon ion-android-settings" ng-click="settings()"></a>
       </ion-nav-buttons>
@@ -22,11 +22,21 @@
 
   <ion-side-menu side="left">
     <ion-header-bar class="bar-stable">
-      <h1 class="title">Left</h1>
+      <h1 class="title" ng-if="!$storage.isProfilView">Friends</h1>
+      <h1 class="title" ng-if="$storage.isProfilView">{{$storage.pseudo}}</h1>
+      <a class="button button-icon icon ion-android-person" ng-if="$storage.islog" ng-click="showMyHistory()"></a>
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <div ng-repeat="user in userlist track by $index">
+        <ion-item menu close ng-if="!$storage.isProfilView" class="row">
+          <label class="item-input col col-90">
+            <input type="search" id="search" placeholder="Search a friend" ng-model="$storage.dataSearch.search" ng-focus="$storage.searchFocused = true" ng-blur="$storage.searchFocused = false" ng-change="onSearchInput($storage.dataSearch)" class="full-width" close>
+          </label>
+          <label class="item-input col col-10">
+            <button ng-if="$storage.dataSearch.search.length" class="button button-icon ion-android-close input-button button-small" ng-click="onSearchCancel($storage.dataSearch)"></button>
+          </label>
+        </ion-item>
+        <div ng-if="!$storage.isProfilView" ng-repeat="user in userlist track by $index">
           <ion-item class="item-stable"
                     ng-click="toggleUser(user)"
                     ng-class="{active: isUserShown(user)}">
@@ -40,6 +50,41 @@
             {{info.date}}
           </ion-item>
         </div>
+        <ion-item menu close ng-if="$storage.isProfilView" class="row">
+          <label class="item-input col col-90">
+            <input type="search" id="search-profil" placeholder="Search a date" ng-model="$storage.dataSearch.search" ng-focus="$storage.searchFocused = true" ng-blur="$storage.searchFocused = false" ng-change="onSearchInputProfil($storage.dataSearch)" class="full-width" close>
+          </label>
+          <label class="item-input col col-10">
+            <button ng-if="$storage.dataSearch.search.length" class="button button-icon ion-android-close input-button button-small" ng-click="onSearchCancelProfil($storage.dataSearch)"></button>
+          </label>
+        </ion-item>
+        <div ng-if="$storage.isProfilView">
+          <ion-item class="item-stable"
+                    ng-click="toggleUInfo()"
+                    ng-class="{active: shownUInfo}">
+              <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
+            &nbsp;
+            Informations
+          </ion-item>
+          <ion-item class="item-accordion"
+                    ng-repeat="(key,value) in filterUInfo(profillist._user)"
+                    ng-show="shownUInfo">
+            {{key}} : {{value}}
+          </ion-item>
+        </div>
+        <div ng-if="$storage.isProfilView" ng-repeat="info in profillist._info track by $index">
+          <ion-item class="item-stable row row-center"
+                    ng-click="toggleInfo(info)"
+                    ng-class="{active: isInfoShown(info)}">
+            &nbsp;
+            <label class="col col-90">{{info.date}}</label><label class="col col-10"><button class="button button-icon ion-trash-a" ng-click="deleteInfo(info)"></button></label>
+          </ion-item>
+          <ion-item class="item-accordion"
+                    ng-repeat="(key,value) in filterInfo(info)"
+                    ng-show="isInfoShown(info)">
+            {{key}} : {{value}}
+          </ion-item>
+        </div>
       </ion-list>
     </ion-content>
   </ion-side-menu>
@@ -50,12 +95,11 @@
           {{user.pseudo}}
         </ion-item>
  -->
-<!--         <ion-item menu close>
-          <input type="search" placeholder="Search..." ng-model="search" ng-focus="searchFocused = true" ng-blur="searchFocused = false" ng-change="scrollTop()" class="full-width" close>
-            <button ng-if="search.length" class="button button-icon ion-android-close input-button" ng-click="clearSearch()"></button>
-        </ion-item>
-        <ion-searchbar menu close ng-model="search"
-          showCancelButton="shouldShowCancel"
-          ionInput="onInput($event)"
-          ionCancel="onCancel($event)">
-        </ion-searchbar> -->
+<!--         
+        <ion-searchbar ng-model="search"
+            showCancelButton="shouldShowCancel"
+            ionInput="onSearchInput($event)"
+            ionCancel="onSearchCancel($event)"
+            placeholder="Search a friend">
+        </ion-searchbar>
+         -->

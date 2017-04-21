@@ -1,12 +1,18 @@
 <ion-popover-view>
 	<ion-header-bar>
-	  <h1 class="title">My Popover Title</h1>
+	  <h1 class="title">Set serveur url</h1>
+	    <div class="buttons">
+	      <button class="button button-clear" ng-click="closePopover()">Close</button>
+	    </div>
 	</ion-header-bar>
 	<ion-content>
-	   <ion-list>
-	      <ion-item ng-repeat="user in pseudolist">
-	        {{user.pseudo}}
-	      </ion-item>
-	    </ion-list>
-	</ion-content>
+    <form name="urlForm" data-ng-click="doUrl()">
+      <div class="list">
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Url</span>
+          <input id="url" style="margin-right:20px;" type="text" data-ng-model="$storage.url" placeholder="Url" name="Url" required>
+        </label>
+      </div>
+    </form>
+  </ion-content>
 </ion-popover-view>

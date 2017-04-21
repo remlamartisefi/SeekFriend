@@ -1,0 +1,28 @@
+<ion-view>
+  <ion-content>
+    <ion-list>
+      <ion-item menu close class="row">
+        <label class="item-input col col-90">
+          <input type="search" id="search" placeholder="Search a friend" ng-model="dataSearch.search" ng-focus="searchFocused = true" ng-blur="searchFocused = false" ng-change="onSearchInput(dataSearch)" class="full-width" close>
+        </label>
+        <label class="item-input col col-10">
+          <button ng-show="dataSearch.search.length" class="button button-icon ion-android-close input-button button-small" ng-click="onSearchCancel(dataSearch)"></button>
+        </label>
+      </ion-item>
+      <div ng-repeat="user in userlist track by $index">
+        <ion-item class="item-stable"
+                  ng-click="toggleUser(user)"
+                  ng-class="{active: isUserShown(user)}">
+            <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
+          &nbsp;
+          {{user._user.pseudo}}
+        </ion-item>
+        <ion-item class="item-accordion"
+                  ng-repeat="info in user._info"
+                  ng-show="isUserShown(user)">
+          {{info.date}}
+        </ion-item>
+      </div>
+    </ion-list>
+  </ion-content>
+</ion-view>
