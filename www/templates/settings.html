@@ -1,5 +1,59 @@
 <ion-view view-title="Settings">
   <ion-content>
     <h1>Settings</h1>
+    <ul class="list">
+ 	  <li class="item item-toggle">
+	     Change the server address
+	     <!-- ligne 221 -->
+	     <a class="button button-icon icon ion-briefcase" ng-click="showStorage($event)"></a>
+	  </li>
+	  <li class="item item-toggle">
+	     Center the map at every position refresh 
+	     <!-- ligne 221 -->
+	     <label class="toggle toggle-assertive">
+	       <input type="checkbox">
+	       <div class="track">
+	         <div class="handle"></div>
+	       </div>
+	     </label>
+	  </li>
+	  <li class="item item-toggle">
+	     Se souvenir de moi ?
+	     <label class="toggle toggle-assertive">
+	       <input type="checkbox">
+	       <div class="track">
+	         <div class="handle"></div>
+	       </div>
+	     </label>
+	  </li>
+	  <li class="item item-toggle">
+	     Maintenir la connection.
+	     <label class="toggle toggle-assertive">
+	       <input type="checkbox">
+	       <div class="track">
+	         <div class="handle"></div>
+	       </div>
+	     </label>
+	  </li>
+
+	  <div class="item range">
+	  	<!-- zoom of the map $storage.mapZoom -->
+	  	<input type="range" name="$storage.mapZoom">
+	  	<i class="icon ion-android-search ion-lg"></i>
+	  </div>
+
+	  <li class="item item-toggle">
+		<label class="item item-input item-select">
+		    <div class="input-label">
+		      Lightsaber
+		    </div>
+		    <select>
+		      <option>Blue</option>
+		      <option selected>Green</option>
+		      <option>Red</option>
+		    </select>
+	  	 </label>
+	  </li>
+	</ul>
   </ion-content>
 </ion-view>

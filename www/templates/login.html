@@ -1,6 +1,6 @@
 <ion-modal-view style="min-height:300px;">
   <ion-header-bar>
-    <div ng-show="!!$storage.isreg" class="pull-left buttons">
+    <div ng-show="!$storage.isreg" class="pull-left buttons">
       <button class="button button-balanced pull-left" ng-click="register_view()">Register</button> 
     </div>
     <h1 class="title">Login</h1>
@@ -23,7 +23,7 @@
         </label>
         <label class="item item-input" style="border-bottom-width: 0px;">
           <span class="input-label">Password</span>
-          <input id="password" style="margin-right:20px;" type="password" name="Password" placeholder="Password" data-ng-model="loginData.password" data-ng-minlength="3 " data-ng-maxlength="32" required>
+          <input id="password" style="margin-right:20px;" type="password" name="Password" placeholder="Password" data-ng-model="loginData.password" data-ng-minlength="3 " data-ng-maxlength="20" required>
         </label>
         <label class="item item-input" style="border-top-width: 0px;">
           <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$invalid && !loginForm.Password.$error.minlength && !loginForm.Password.$error.maxlength">

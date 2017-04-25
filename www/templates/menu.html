@@ -11,11 +11,9 @@
         <a ng-show="!$storage.islog" class="button button-icon icon ion-log-in" ng-click="openLogin()"></a>
         <a ng-show="$storage.islog" class="button button-icon icon ion-log-out" ng-click="openLogout()"></a>
         <a ng-show="$storage.islog" class="button button-icon icon ion-plus-round" ng-click="addLocation()"></a>
-        <a class="button button-icon icon ion-briefcase" ng-click="showStorage($event)"></a>
         <a class="button button-icon icon ion-android-locate" ng-click="refreshLoc(true)"></a>
         <a class="button button-icon icon ion-android-settings" ng-click="settings()"></a>
       </ion-nav-buttons>
-
     </ion-nav-bar>
     <ion-nav-view name="menuContent"></ion-nav-view>
   </ion-side-menu-content>
@@ -26,7 +24,11 @@
       <h1 class="title" ng-if="$storage.isProfilView">{{$storage.pseudo}}</h1>
       <a class="button button-icon icon ion-android-person" ng-if="$storage.islog" ng-click="showMyHistory()"></a>
     </ion-header-bar>
-    <ion-content>
+    <ion-content overflow-scroll=”true”>
+      <ion-refresher
+        on-refresh="refreshMenuData()"
+        center>
+      </ion-refresher>
       <ion-list>
         <ion-item menu close ng-if="!$storage.isProfilView" class="row">
           <label class="item-input col col-90">
@@ -36,13 +38,20 @@
             <button ng-if="$storage.dataSearch.search.length" class="button button-icon ion-android-close input-button button-small" ng-click="onSearchCancel($storage.dataSearch)"></button>
           </label>
         </ion-item>
-        <div ng-if="!$storage.isProfilView" ng-repeat="user in userlist track by $index">
-          <ion-item class="item-stable"
+        <div ng-if="!$storage.isProfilView" ng-repeat="user in filterUserList(userlist) track by $index">
+          <ion-item class="item-stable row row-center"
                     ng-click="toggleUser(user)"
                     ng-class="{active: isUserShown(user)}">
               <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
             &nbsp;
-            {{user._user.pseudo}}
+            <label class="col col-10">
+              <i ng-if="user._user.isLog" class="icon ion-record balanced"></i>
+              <i ng-if="!user._user.isLog" class="icon ion-record assertive"></i>
+            </label>
+            <label class="col col-75">{{user._user.pseudo}} </label>
+            <label class="col col-10">
+              <button class="button button-icon ion-plus" ng-click="addFriends(user)"></button>
+            </label>
           </ion-item>
           <ion-item class="item-accordion"
                     ng-repeat="info in user._info"
@@ -85,6 +94,10 @@
             {{key}} : {{value}}
           </ion-item>
         </div>
+             <!--    <ion-infinite-scroll
+          ng-if="moreDataCanBeLoaded()"
+          distance="10%">
+        </ion-infinite-scroll> -->
       </ion-list>
     </ion-content>
   </ion-side-menu>
