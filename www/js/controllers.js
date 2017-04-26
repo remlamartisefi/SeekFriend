@@ -38,6 +38,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $ionicModal.fromTemplateUrl('templates/enableGeoloc.html', {scope: $scope}).then(function(modal) {$scope.enableGeoloc = modal;});
   $ionicModal.fromTemplateUrl('templates/logout.html', {scope: $scope}).then(function(modal) {$scope.logout = modal;});
   $ionicPopover.fromTemplateUrl('templates/my-popover.html', {scope: $scope}).then(function(popover) {$scope.popover = popover;});
+  $ionicModal.fromTemplateUrl('templates/addFriendModal.html', {scope: $scope}).then(function(modal) {$scope.addFriendModal = modal;});
 
   // Triggered in the login or register modal to close it
   $scope.closeLogin = function() {$scope.login.hide();};
@@ -50,6 +51,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $scope.openLogout = function() {$scope.logout.show();};
   $scope.openPopover = function($event) {$scope.popover.show($event);};
   $scope.closePopover = function() {$scope.popover.hide();};
+  $scope.closeFriend = function() {$scope.addFriendModal.hide();};
+  $scope.openFriend = function(user) {$scope.addFriendModal.show();$scope.addFriendModal.user = user;};
   // Switch Modal View
   $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();};
   $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();};
@@ -156,6 +159,22 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $timeout(function() {
       $scope.closeRegister();
     }, 60000);
+  };
+
+  $scope.addFriend = function(user){
+    // console.log(user);
+    var data = {
+      friends1 : $scope.$storage.user_id,
+      friends2 : user._user._id
+    };
+    $http.post($scope.$storage.url + '/users/getbyid', {user_id: user._user._id})
+    .success(function(response){
+      $http.post($scope.$storage.url + '/friends/addfriend', data)
+      .success(function(response){
+        console.log('Add Friend');    
+        $scope.closeFriend();
+      }).error(function(err, config) {console.log(config);});
+    }).error(function(err, config) {console.log(config);}); 
   };
 })
 
@@ -305,13 +324,15 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
   // toggle fonction from the view of the sidebar menu ----------------------------------------------------
   $scope.toggleUser = function(user) {
-    $scope.markers.forEach(function(value,key){value.setMap(null);});
-    if($scope.isUserShown(user))
-      $scope.shownUser = null;
-    else {
-      $scope.shownUser = user;
-      $scope.markers = [];
-      user._info.forEach(function(value,key){$scope.showLocation(value);});
+    if(user._isfriend){
+      $scope.markers.forEach(function(value,key){value.setMap(null);});
+      if($scope.isUserShown(user))
+        $scope.shownUser = null;
+      else {
+        $scope.shownUser = user;
+        $scope.markers = [];
+        user._info.forEach(function(value,key){$scope.showLocation(value);});
+      }
     }
   };
   $scope.isUserShown = function(user) {return $scope.shownUser === user;};
@@ -360,6 +381,18 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     }
     return result;
   };
+  // add friend methods
+  $scope.isFriend = function(user){
+    var data = {
+      friends1 : $scope.$storage.user_id,
+      friends2 : user._id
+    };
+    $http.post($scope.$storage.url + '/friends/isfriend',data)
+    .success(function(response){
+      console.log(response.isFriend);
+      return response.isFriend;
+    }).error(function(err, config) {console.log(config);return false;});        
+  };
 
   // switch menu view to see your position history and your personal informations ---------------------------------
   $scope.showMyHistory = function(){
@@ -389,7 +422,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.userlist = [];
       response.forEach(function(value,key){
         if(value._id != $scope.$storage.user_id){
-          $scope.userlist.push({_user: value,_info: []});
+          $scope.userlist.push({_user: value,_info: [],_isfriend: $scope.isFriend(value)});
           $http.post($scope.$storage.url + '/coords/getall',{user_id: value._id})
           .success(function(res){
             if(res.length != 0){
@@ -411,7 +444,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     .success(function(response){
       $scope.userlist = [];
       response.forEach(function(value,key){
-        $scope.userlist.push({_user: value,_info: []});
+        $scope.userlist.push({_user: value,_info: [],_isfriend: $scope.isFriend(value)});
         $http.post($scope.$storage.url + '/coords/getall',{user_id: value._id})
         .success(function(res){
           // console.log(res);
