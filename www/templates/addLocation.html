@@ -1,0 +1,14 @@
+<ion-modal-view style="max-height:100px;">
+  <ion-header-bar>
+    <h1 class="title">Add Location</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closeAddLocation()">Close</button>
+    </div>
+  </ion-header-bar>
+  <ion-content ng-controller="MenuCtrl">
+   <div class="buttons">
+      <button class="button button-clear row row-center" ng-click="addLocation();closeAddLocation()">Add your current location</button>
+      <button class="button button-clear row row-center" ng-click="openPreviousLocation();closeAddLocation()">Add a previous location</button>
+    </div>
+  </ion-content>
+</ion-modal-view>

@@ -1,0 +1,30 @@
+<ion-modal-view style="min-height:360px;">
+  <ion-header-bar>
+    <h1 class="title">Add a previous location</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="closePreviousLocation()">Close</button>
+    </div>
+  </ion-header-bar>
+  <ion-content ng-controller="MenuCtrl">
+    <form name="previousLocationForm" data-ng-click="doRegisterPreviousLocation(rangeData)">
+      <div class="list">
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Longitude</span>
+          <input id="longitude" style="margin-right:20px;" type="number" step="0.0001" ng-model="rangeData.longitude" ng-pattern="numberFormat" placeholder="longitude" name="longitude" required>
+        </label>
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Latitude</span>
+          <input id="latitude" style="margin-right:20px;" type="number"  step="0.0001" ng-model="rangeData.latitude" ng-pattern="numberFormat" placeholder="latitude" name="atitude" required>
+        </label>
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Date et heure</span>
+          <input id="Date" style="margin-right:20px;" type="Date"  ng-model="rangeData.date" ng-pattern="dateFormat" placeholder="date et heure (ex : 02/02/2005 17:25:13)" name="date" required>
+        </label>
+        <label class="item item-input" style="border-top-width: 0px;">
+        <label class="item" style="border-bottom-width: 0px;">
+          <button class="button button-block button-positive" type="submit">Ajouter</button>
+        </label>
+      </div>
+    </form>
+  </ion-content>
+</ion-modal-view>

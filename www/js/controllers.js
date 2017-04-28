@@ -1,7 +1,3 @@
-// var url = 'http://mlollo.rmorpheus.enseirb.fr:8080'
-// var url = 'http://localhost:8080'
-// var url = 'http://b96e1293.ngrok.io'
-
 angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
 .controller('AppCtrl', function($scope, $http, $ionicModal, $ionicPopover, $ionicPlatform, $localStorage) {
@@ -10,6 +6,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   //  $storage initialisation
   $scope.$storage = $localStorage;
   $scope.$storage.url = 'http://mlollo.rmorpheus.enseirb.fr';
+  $scope.$storage.panToLocation = true;
   // $scope.$storage.url = 'http://b96e1293.ngrok.io';
 
   if("undefined" === typeof $scope.$storage.islog)
@@ -21,11 +18,14 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     .success(function(response){$scope.$storage.isProfilView = false;console.log("Logged!");})
     .error(function(err, config) {console.log(config);});
   }else{
-    $scope.$storage.$reset();
-    $scope.$storage.url = 'http://mlollo.rmorpheus.enseirb.fr';
     $http.post($scope.$storage.url + '/users/logout', {email: $scope.$storage.email})
     .success(function(response){$scope.$storage.isProfilView = false;})
     .error(function(err, config) {console.log(config);});
+    $scope.$storage.isreg = false;
+    $scope.$storage.email = '';
+    $scope.$storage.password = '';
+    $scope.$storage.pseudo = '';
+    $scope.$storage.user_id = '';
   }
 
   $scope.$storage.dataSearch = {search : ""};
@@ -37,8 +37,12 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $ionicModal.fromTemplateUrl('templates/register.html', {scope: $scope}).then(function(modal) {$scope.register = modal;});
   $ionicModal.fromTemplateUrl('templates/enableGeoloc.html', {scope: $scope}).then(function(modal) {$scope.enableGeoloc = modal;});
   $ionicModal.fromTemplateUrl('templates/logout.html', {scope: $scope}).then(function(modal) {$scope.logout = modal;});
-  $ionicPopover.fromTemplateUrl('templates/my-popover.html', {scope: $scope}).then(function(popover) {$scope.popover = popover;});
   $ionicModal.fromTemplateUrl('templates/addFriendModal.html', {scope: $scope}).then(function(modal) {$scope.addFriendModal = modal;});
+  $ionicModal.fromTemplateUrl('templates/removeFriendModal.html', {scope: $scope}).then(function(modal) {$scope.removeFriendModal = modal;});
+  $ionicPopover.fromTemplateUrl('templates/my-popover.html', {scope: $scope}).then(function(popover) {$scope.popover = popover;});
+  $ionicPopover.fromTemplateUrl('templates/popoverMenu.html', {scope: $scope}).then(function(popover) {$scope.popoverMenu = popover;});
+  $ionicModal.fromTemplateUrl('templates/addLocation.html', {scope: $scope}).then(function(modal) {$scope.addLocationModal = modal;});
+  $ionicModal.fromTemplateUrl('templates/previousLocation.html', {scope: $scope}).then(function(modal) {$scope.previousLocationModal = modal;});
 
   // Triggered in the login or register modal to close it
   $scope.closeLogin = function() {$scope.login.hide();};
@@ -50,22 +54,36 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $scope.closeLogout = function() {$scope.logout.hide();};
   $scope.openLogout = function() {$scope.logout.show();};
   $scope.openPopover = function($event) {$scope.popover.show($event);};
-  $scope.closePopover = function() {$scope.popover.hide();};
+  $scope.closePopover = function() {$scope.popover.hide();};  
+  $scope.openPopoverMenu = function($event) {$scope.popoverMenu.show($event);};
+  $scope.closePopoverMenu = function() {$scope.popoverMenu.hide();};
   $scope.closeFriend = function() {$scope.addFriendModal.hide();};
-  $scope.openFriend = function(user) {$scope.addFriendModal.show();$scope.addFriendModal.user = user;};
+  $scope.openFriend = function(user) {$scope.addFriendModal.show();$scope.addFriendModal.data = user;};
+  $scope.closeRemoveFriend = function() {$scope.removeFriendModal.hide();};
+  $scope.openRemoveFriend = function(user) {$scope.removeFriendModal.show();$scope.removeFriendModal.data = user;};
+  $scope.closePreviousLocation = function() {$scope.previousLocationModal.hide();};
+  $scope.openPreviousLocation = function() {$scope.previousLocationModal.show();};
+  $scope.closeAddLocation = function() {$scope.addLocationModal.hide();};
+  $scope.openAddLocation = function() {$scope.addLocationModal.show();};
   // Switch Modal View
   $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();};
   $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();};
   $scope.logout_view = function(){$scope.closeLogout();$scope.openLogout();};
+  $scope.addLocation_view = function(){$scope.closeAddLocation();$scope.openAddLocation();};
+  $scope.previousLocation_view = function(){$scope.openPreviousLocation();$scope.openPreviousLocation();};
 })
 
 .controller('SignCtrl',function($scope,$timeout,$http, $sessionStorage){
   $http.defaults.headers.post["Content-Type"] = "application/json";
 
-  // Form data for the login modal
+  // Form data for the login modal and others
   $scope.loginData = {};
   $scope.registerData = {};
+  $scope.rangeData = {};
   $scope.emailFormat = /^[a-z]+[a-z0-9._]+@[a-z]+\.[a-z.]{2,5}$/;
+  $scope.numberFormat = /^[0-9]+(\.[0-9]{2,4})?$/;
+  $scope.dateFormat = /^([0-9]{2}[-/][0-9]{2}[-/][0-9]{4}[- ][0-9]{2}[-:][0-9]{2}[-:][0-9]{2})|([0-9]{14})/;
+
   // Perform the login action when the user submits the login form
   $scope.doLogin = function(loginData) {
     $scope.loginForm.submitted = true;
@@ -117,15 +135,17 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       .success(function(response){
         console.log('Doing Logout');
         // console.log(response);
-        $scope.$storage.$reset();
-        $scope.$storage.url = 'http://mlollo.rmorpheus.enseirb.fr';
+        $scope.$storage.email = '';
+        $scope.$storage.password = '';
+        $scope.$storage.pseudo = '';
+        $scope.$storage.user_id = '';       
         $scope.$storage.islog = false;
         $scope.$storage.isreg = false;
         $scope.closeLogout();
       }).error(function(err, config) {console.log(config);});
   };
 
-  $scope.doRegister = function() {
+  $scope.doRegister = function(registerData) {
     $scope.registerForm.submitted = true;
     var data = {
       email : $scope.registerData.email,
@@ -160,31 +180,40 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.closeRegister();
     }, 60000);
   };
-
-  $scope.addFriend = function(user){
-    // console.log(user);
-    var data = {
-      friends1 : $scope.$storage.user_id,
-      friends2 : user._user._id
-    };
-    $http.post($scope.$storage.url + '/users/getbyid', {user_id: user._user._id})
-    .success(function(response){
-      $http.post($scope.$storage.url + '/friends/addfriend', data)
-      .success(function(response){
-        console.log('Add Friend');    
-        $scope.closeFriend();
-      }).error(function(err, config) {console.log(config);});
-    }).error(function(err, config) {console.log(config);}); 
-  };
 })
 
 .controller('MapCtrl', function($scope) {
   $scope.refreshMap();
 })
 
+.controller('SettingsCtrl', function($scope) {
+  $scope.$storage.settingsList = [
+  {
+    name: "panToLocation",
+    text: "Camera focus on your location",
+    checked: $scope.$storage.panToLocation
+  },  
+  {
+    name: "refreshMap",
+    text: "Reload map",
+    checked: false
+  }
+  ];
+
+  $scope.updateItemSettings = function(item){
+    if(item.name === "panToLocation"){
+      $scope.$storage.panToLocation = item.checked;
+    }
+    else if(item.name === "refreshMap"){
+      $scope.refreshMap();
+      item.checked = false
+    }
+  };
+})
+
 .controller('MenuCtrl', function($scope, $ionicPopup, $ionicHistory, 
-  $ionicPlatform, $cordovaGeolocation,$ionicLoading, $state, $interval, 
-  $ionicPopover,$http,$timeout) {
+  $ionicPlatform, $cordovaGeolocation, $ionicLoading, $state, $interval, 
+  $ionicPopover, $http, $timeout, $ionicSideMenuDelegate) {
   $http.defaults.headers.common["Accept"] = "application/json";
 
   // settings option -------------------------------------------------------------------------------------
@@ -239,7 +268,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         // geocoder.geocode({'latLng': latLng}, function (results, status) {
-        //   if (status == google.maps.GeocoderStatus.OK) {
+          // if (status == google.maps.GeocoderStatus.OK) {
             google.maps.event.addListenerOnce($scope.map, 'idle', function(){
               $scope.location.setMap(null);
               $scope.location = new google.maps.Marker({
@@ -251,45 +280,17 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
             if(panTo)
               $scope.map.panTo(latLng);
           // }
-        // })
+        // });
       },function(error){console.log("Could not get location");console.log(error);}); 
     });
   };
 
   // every 5 sec refresh the blue point position
-  var theInterval = $interval(function(){$scope.refreshLoc(true);}.bind(this), 5000); 
-
-// method used in line 282 and 466 --------------------------------------------------------------------------
-  $scope.refreshMenuData = function(){
-    if(!$scope.$storage.searchFocused){
-      if($scope.$storage.isProfilView){
-        $scope.onProfil({'search' : $scope.$storage.pseudo});
-        $timeout(function(){
-          for(var key in $scope.profillist._info){
-            if($scope.shownInfo !== null){
-              if($scope.profillist._info[key]._id === $scope.shownInfo._id){
-                $scope.shownInfo = $scope.profillist._info[key];
-              }
-            }
-          }
-        },1000);
-      }else{
-        $scope.reloadFriendsList();
-        $timeout(function(){
-          $scope.userlist.forEach(function(value,key){
-            if($scope.shownUser !== null){
-              if(value._user._id === $scope.shownUser._user._id){
-                $scope.shownUser = value;
-              }
-            }
-          });
-        },1000);
-      }
-    }
-  };
+  var theInterval = $interval(function(){$scope.refreshLoc($scope.$storage.panToLocation);}.bind(this), 5000); 
 
   // add a marker in your database
   $scope.markers = [];
+  $scope. infowindows = [];
   $scope.addLocation = function(){
     var latLng = new google.maps.LatLng($scope.location.position.lat(), $scope.location.position.lng());
     $scope.markers.push(new google.maps.Marker({
@@ -297,6 +298,10 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         position:  latLng,
         animation: google.maps.Animation.DROP
     }));
+    $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+info.date+"</label></div>"}));  
+    $scope.markers[$scope.markers.length-1].addListener('click', function() {
+      $scope.infowindows[$scope.infowindows-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
+    });
     // console.log($scope.markers[$scope.markers.length - 1]);
     var data = {
       user_id: $scope.$storage.user_id,
@@ -312,6 +317,21 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     .error(function(err, config) {console.log(config);});
   };
 
+  $scope.doRegisterPreviousLocation = function() {
+    var data = {
+      user_id: $scope.$storage.user_id,
+      lat: $scope.rangeData.latitude,
+      lng: $scope.rangeData.longitude, 
+      date: $scope.rangeData.date
+    };
+    if($scope.rangeData.longitude > -31 && $scope.rangeData.longitude < 115 && $scope.rangeData.latitude < 41 && $scope.rangeData.latitude > -120 ){
+      $http.post($scope.$storage.url + '/coords/add', data).success(function(response){
+        console.log('Adding a Coord');
+        $scope.refreshMenuData();
+      }).error(function(err, config) {console.log(config);});
+   }
+  };
+
   // show a marker from the database
   $scope.showLocation = function(info){
     var latLng = new google.maps.LatLng(info.lat, info.lng);
@@ -320,25 +340,31 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         position:  latLng,
         animation: google.maps.Animation.DROP
     }));
+    $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+info.date+"</label></div>"}));  
+    $scope.markers[$scope.markers.length - 1].addListener('click', function() {
+      $scope.infowindows[$scope.infowindows.length - 1].open($scope.map, $scope.markers[$scope.markers.length - 1]);
+    });
+    return latLng;
   };
 
   // toggle fonction from the view of the sidebar menu ----------------------------------------------------
   $scope.toggleUser = function(user) {
-    if(user._isfriend){
+    if(user.isfriend){
       $scope.markers.forEach(function(value,key){value.setMap(null);});
+      console.log(user);
       if($scope.isUserShown(user))
         $scope.shownUser = null;
       else {
         $scope.shownUser = user;
         $scope.markers = [];
-        user._info.forEach(function(value,key){$scope.showLocation(value);});
+        user.info.forEach(function(value,key){$scope.showLocation(value);});
       }
     }
   };
   $scope.isUserShown = function(user) {return $scope.shownUser === user;};
   $scope.filterUserList = function(userlist){
     for(var key in userlist)
-        if(userlist[key]._user._id == $scope.$storage.user_id && $scope.$storage.islog === true)
+        if(userlist[key].user._id == $scope.$storage.user_id && $scope.$storage.islog === true)
             userlist.splice(key,1);
     return userlist;
   };
@@ -349,10 +375,16 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $scope.markers = [];
     if($scope.isInfoShown(info)) {
       $scope.shownInfo = null;
-      $scope.profillist._info.forEach(function(value,key){$scope.showLocation(value);});
+      $scope.$storage.panToLocation = true;
+      $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
     } else {
+      $ionicSideMenuDelegate.toggleLeft(false);
+      $scope.$storage.panToLocation = false;
+      $scope.map.panTo($scope.showLocation(info));
       $scope.shownInfo = info;
-      $scope.showLocation(info);
+      $scope.infowindow = new google.maps.InfoWindow();  
+      $scope.infowindow.setContent("<div class='row row-center'><label>"+info.date+"</label></div>");
+      $scope.infowindow.open($scope.map, $scope.markers[0]);
     }
   };
   $scope.isInfoShown = function(info) {return $scope.shownInfo === info;};
@@ -372,27 +404,33 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.shownUInfo = true;
   };
 
-  $scope.filterUInfo = function(_user){
+  $scope.filterUInfo = function(user){
     var result = {};
-    for(var key in _user) {
+    for(var key in user) {
         if(!key.startsWith("_")) {
-            result[key] = _user[key];
+            result[key] = user[key];
         }
     }
     return result;
   };
-  // add friend methods
-  $scope.isFriend = function(user){
-    var data = {
-      friends1 : $scope.$storage.user_id,
-      friends2 : user._id
-    };
-    $http.post($scope.$storage.url + '/friends/isfriend',data)
-    .success(function(response){
-      console.log(response.isFriend);
-      return response.isFriend;
-    }).error(function(err, config) {console.log(config);return false;});        
-  };
+
+  $scope.infoWindow = function(info){
+    $scope.markers.forEach(function(value,key){value.setMap(null);});
+    $scope.markers = [];
+    if($scope.isInfoShown(info)){
+      $scope.shownInfo = null;
+      $scope.$storage.panToLocation = true;
+      $scope.shownUser.info.forEach(function(value,key){$scope.showLocation(value);});
+    }else{
+      $ionicSideMenuDelegate.toggleLeft(false);
+      $scope.$storage.panToLocation = false;
+      $scope.map.panTo($scope.showLocation(info));
+      $scope.shownInfo = info;
+      $scope.infowindow = new google.maps.InfoWindow();  
+      $scope.infowindow.setContent("<div class='row row-center'><label>"+info.date+"</label></div>");
+      $scope.infowindow.open($scope.map, $scope.markers[0]);
+    }
+  }
 
   // switch menu view to see your position history and your personal informations ---------------------------------
   $scope.showMyHistory = function(){
@@ -403,7 +441,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.markers.forEach(function(value,key){value.setMap(null);});
       $scope.markers = [];
       $timeout(function(){
-        $scope.profillist._info.forEach(function(value,key){$scope.showLocation(value);});
+        $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
       },2000);
       
     }else{
@@ -416,97 +454,167 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
   // refresh Friends List fonction to load in the sidebar view ---------------------------------------------
   $scope.reloadFriendsList = function() {
-    $http.defaults.headers.common["Accept"] = "application/json";
-    $http.get($scope.$storage.url + '/users/getall')
-    .success(function(response){
-      $scope.userlist = [];
+    $scope.userlist = [];
+    // $scope.$storage.dataSearch = {search : ""};
+    $http.get($scope.$storage.url + '/users/getall').success(function(response){
+      
       response.forEach(function(value,key){
         if(value._id != $scope.$storage.user_id){
-          $scope.userlist.push({_user: value,_info: [],_isfriend: $scope.isFriend(value)});
-          $http.post($scope.$storage.url + '/coords/getall',{user_id: value._id})
-          .success(function(res){
-            if(res.length != 0){
-              $scope.userlist[key]._info = [];
-              for (var j=0; j<res.length; j++) {
-                $scope.userlist[key]._info.push(res[j]); 
-              }
+          var data = {friends1 : $scope.$storage.user_id,friends2 : value._id};
+          
+          $http.post($scope.$storage.url + '/friends/isfriend',data).success(function(response){
+            if(response.isfriend){
+              
+              $http.post($scope.$storage.url + '/coords/getall',{user_id: value._id}).success(function(res){
+                if(res.length != 0){
+                  var infoc = [];
+                  for (var j=0; j<res.length; j++) {
+                    infoc.push(res[j]); 
+                  }
+                  $scope.userlist.push({user: value,info: infoc,isfriend: response.isfriend}); 
+                  // console.log(value.pseudo);
+                  // console.log(infoc);
+                }else{
+                  // console.log(value.pseudo);
+                  // console.log([]);
+                  $scope.userlist.push({user: value,info: [],isfriend: response.isfriend}); 
+                }               
+              }).error(function(err, config) {console.log(config);});
+            
             }
-          }).error(function(err, config) {console.log(config);});        }
+          }).error(function(err, config) {console.log(config);});
+        
+        }
       });
     }).error(function(err, config) {console.log(config);})
     .finally(function() {$scope.$broadcast('scroll.refreshComplete');});
+  
   };
 
   // Search fonctions -------------------------------------------------------------------------------------
   $scope.onSearchInput = function(data){
-    // $scope.$broadcast('scroll.refreshStarted');
-    $http.post($scope.$storage.url + '/users/getbypseudo',{pseudo : data.search})
-    .success(function(response){
-      $scope.userlist = [];
+    $scope.userlist = [];
+    $scope.shownUser = null;
+    $http.post($scope.$storage.url + '/users/getbypseudo',{pseudo : data.search}).success(function(response){
+
       response.forEach(function(value,key){
-        $scope.userlist.push({_user: value,_info: [],_isfriend: $scope.isFriend(value)});
-        $http.post($scope.$storage.url + '/coords/getall',{user_id: value._id})
-        .success(function(res){
-          // console.log(res);
-          if(res.length != 0){
-            $scope.userlist[key]._info = [];
-            for (var j=0; j<res.length; j++) {
-              $scope.userlist[key]._info.push(res[j]); 
-            }
-          }
-        }).error(function(err, config) {console.log(config);})
+        if(value._id != $scope.$storage.user_id){
+          var data = {friends1 : $scope.$storage.user_id,friends2 : value._id};
+          
+          $http.post($scope.$storage.url + '/friends/isfriend',data).success(function(response){
+            
+            $http.post($scope.$storage.url + '/coords/getall',{user_id: value._id}).success(function(res){
+              if(res.length != 0){
+                var infoc = [];
+                for (var j=0; j<res.length; j++) {
+                  infoc.push(res[j]); 
+                }
+                $scope.userlist.push({user: value,info: infoc,isfriend: response.isfriend});
+              }else{
+                $scope.userlist.push({user: value,info: [],isfriend: response.isfriend});
+              }
+            }).error(function(err, config) {console.log(config);});
+          
+          }).error(function(err, config) {console.log(config);});
+        
+        }
       });
     }).error(function(err, config) {console.log(config);$scope.userlist = [];})
     .finally(function() {$scope.$broadcast('scroll.refreshComplete');});
+  
   };
 
   // search a specific location by date
   $scope.onSearchInputProfil = function(data){
     // console.log(data.search);
     // $scope.$broadcast('scroll.refreshStarted');
-    $http.post($scope.$storage.url + '/coords/getbydate',{user_id: $scope.$storage.user_id, date: data.search})
-    .success(function(res){
-      // console.log(res);
+    $scope.shownInfo = null;
+
+    $http.post($scope.$storage.url + '/coords/getbydate',{user_id: $scope.$storage.user_id, date: data.search}).success(function(res){
       if(res.length != 0){
-        $scope.profillist._info = [];
+        var infoc = [];
         for (var j=0; j<res.length; j++) {
-          $scope.profillist._info.push(res[j]); 
+          infoc.push(res[j]); 
         }
+        $scope.profillist.info = infoc;
+      }else{
+        $scope.profillist.info = [];
       }
     }).error(function(err, config) {console.log(config);})
     .finally(function() {$scope.$broadcast('scroll.refreshComplete');});
+  
   };
 
   // equivalent of refresh friends list for coords in the profil view --------------------------------------
   $scope.onProfil = function(data){
-    $http.post($scope.$storage.url + '/users/getbypseudo',{pseudo : data.search})
-    .success(function(response){
+    
+    $http.post($scope.$storage.url + '/users/getbypseudo',{pseudo : data.search}).success(function(response){
       if(response.length == 1){
-        $scope.profillist = {_user: response[0],_info: []};
-        $http.post($scope.$storage.url + '/coords/getall',{user_id: response[0]._id})
-        .success(function(res){
+
+        $http.post($scope.$storage.url + '/coords/getall',{user_id: response[0]._id}).success(function(res){
           if(res.length != 0){
-            $scope.profillist._info = [];
+            var infoc = [];
             for (var j=0; j<res.length; j++) {
-              $scope.profillist._info.push(res[j]); 
+              infoc.push(res[j]); 
             }
+            $scope.profillist = {user: response[0],info: infoc};
+          }else{
+            $scope.profillist = {user: response[0],info: []};
           }
         }).error(function(err, config) {console.log(config);})
+      
       }
     }).error(function(err, config) {console.log(config);})
     .finally(function() {$scope.$broadcast('scroll.refreshComplete');});
+  
   };
 
   $scope.onSearchCancel = function(data){data.search = '';$scope.reloadFriendsList();};
   $scope.onSearchCancelProfil = function(data){data.search = '';$scope.onProfil({'search' : $scope.$storage.pseudo});};
   
+
+  // method used in line 336 and 591 --------------------------------------------------------------------------
+  $scope.refreshMenuData = function(){
+    if(!$scope.$storage.searchFocused){
+      if($scope.$storage.isProfilView){
+        $scope.onProfil({'search' : $scope.$storage.pseudo});
+        $timeout(function(){
+          for(var key in $scope.profillist.info){            
+            if($scope.shownInfo !== undefined && $scope.shownInfo !== null){
+              if($scope.profillist.info[key]._id === $scope.shownInfo._id){
+                $scope.shownInfo = $scope.profillist.info[key];
+              }
+            }
+          }
+        },1000);
+      }else{
+        $scope.reloadFriendsList();
+        $timeout(function(){
+          $scope.userlist.forEach(function(value,key){
+            if($scope.shownUser !== undefined && $scope.shownUser !== null){
+              if(value.user._id === $scope.shownUser.user._id){
+                $scope.shownUser = value;
+              }
+            }
+          });
+        },1000);
+      }
+    }else{
+       if($scope.$storage.isProfilView){
+        $scope.onSearchInputProfil($scope.$storage.dataSearch);
+      }else{
+        $scope.onSearchInput($scope.$storage.dataSearch);
+      }
+    }
+  };
+
   // initialisation of the sidebar view
   if($scope.$storage.isProfilView){
     $scope.onProfil({'search' : $scope.$storage.pseudo});
     $scope.markers.forEach(function(value,key){value.setMap(null);});
     $scope.markers = [];
     $timeout(function(){
-      $scope.profillist._info.forEach(function(value,key){$scope.showLocation(value);});
+      $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
     },5000);
   }else
     $scope.reloadFriendsList();  
@@ -522,14 +630,47 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $http.post($scope.$storage.url + '/coords/rm',{id : info._id})
     .success(function(response){
       console.log("deleted !");
-      $scope.profillist._info.forEach(function(val,index,arr){
+      $scope.profillist.info.forEach(function(val,index,arr){
         if(val._id === info._id){
           console.log(val._id);
           arr.splice(index,1);
         }
       });
     }).error(function(err, config) {console.log(config);});
-  }
+  };
+
+  // add and remove friends methods ------------------------------------------------------------
+  $scope.addFriend = function(user){
+    // console.log(user);
+    var data = {
+      friends1 : $scope.$storage.user_id,
+      friends2 : user.user._id
+    };
+    
+    $http.post($scope.$storage.url + '/users/getbyid', {user_id: user.user._id}).success(function(response){
+      
+      $http.post($scope.$storage.url + '/friends/addfriend', data).success(function(response){
+        console.log('Add Friend');   
+        $scope.closeFriend();
+        // $scope.refreshMenuData(); 
+      }).error(function(err, config) {console.log(config);});
+    
+    }).error(function(err, config) {console.log(config);});
+  };
+  $scope.removeFriend = function(user){
+    // console.log(user);
+    var data = {
+      friends1 : $scope.$storage.user_id,
+      friends2 : user.user._id
+    };
+    
+    $http.post($scope.$storage.url + '/friends/removeFriend', data).success(function(response){
+      console.log('Remove Friend'); 
+      $scope.closeRemoveFriend();
+    }).error(function(err, config) {console.log(config);});
+    // $timeout(function() {$scope.refreshMenuData(); }, 1000);
+
+  };
 })
 
 .controller('PlaylistsCtrl', function($scope) {

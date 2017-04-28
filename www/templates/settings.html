@@ -4,39 +4,20 @@
  	  <li class="item">
 	     <!-- ligne 221 -->
 	    <a class="button button-icon icon ion-briefcase" ng-click="showStorage($event)"></a>
-</label>
 	  </li>
-	  <li class="item item-toggle">
-	     Tracking position
-	     <!-- ligne 221 -->
-	     <label class="toggle toggle-assertive">
-	       <input type="checkbox">
-	       <div class="track">
-	         <div class="handle"></div>
-	       </div>
-	     </label>
-	  </li>
-	  <li class="item item-toggle">
-	     Se souvenir de moi ?
-	     <label class="toggle toggle-assertive">
-	       <input type="checkbox">
-	       <div class="track">
-	         <div class="handle"></div>
-	       </div>
-	     </label>
-	  </li>
-	  <li class="item item-toggle">
-	     Maintenir la connection.
-	     <label class="toggle toggle-assertive">
-	       <input type="checkbox">
-	       <div class="track">
-	         <div class="handle"></div>
-	       </div>
-	     </label>
-	  </li>
+		<div class="item item-divider"> 
+		  Settings
+		</div>
+		<!-- <button ion-button round outline side="rigth">Reload map</button> -->
+		<ion-toggle name="item.name" 
+					ng-repeat="item in $storage.settingsList"
+		            ng-model="item.checked"
+		            ng-change="updateItemSettings(item)"
+		            ng-checked="item.checked">
+		  {{ item.text }}
+		</ion-toggle>
 
-	  <div class="item range">
-	  	<!-- zoom of the map $storage.mapZoom -->
+<!-- 	  <div class="item range">
 	  	<input type="range" name="$storage.mapZoom">
 	  	<i class="icon ion-android-search ion-lg"></i>
 	  </div>
@@ -52,7 +33,7 @@
 		      <option>Red</option>
 		    </select>
 	  	 </label>
-	  </li>
+	  </li> -->
 	</ul>
   </ion-content>
 </ion-view>

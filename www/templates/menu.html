@@ -8,11 +8,8 @@
         </button>
       </ion-nav-buttons>
       <ion-nav-buttons side="right">
-        <a ng-show="!$storage.islog" class="button button-icon icon ion-log-in" ng-click="openLogin()"></a>
-        <a ng-show="$storage.islog" class="button button-icon icon ion-log-out" ng-click="openLogout()"></a>
-        <a ng-show="$storage.islog" class="button button-icon icon ion-plus-round" ng-click="addLocation()"></a>
-        <a class="button button-icon icon ion-android-locate" ng-click="refreshLoc(true)"></a>
-        <a class="button button-icon icon ion-android-settings" ng-click="settings()"></a>
+        <!-- <a class="button button-icon icon ion-ios-arrow-down" ng-click="openPopoverMenu($event)"></a> -->
+        <a class="button button-icon icon ion-android-more-vertical" ng-click="openPopoverMenu($event)"></a>
       </ion-nav-buttons>
     </ion-nav-bar>
     <ion-nav-view name="menuContent"></ion-nav-view>
@@ -45,17 +42,22 @@
               <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
             &nbsp;
             <label class="col col-10">
-              <i ng-if="user._user.isLog" class="icon ion-record balanced"></i>
-              <i ng-if="!user._user.isLog" class="icon ion-record assertive"></i>
+              <i ng-if="user.user.isLog" class="icon ion-record balanced"></i>
+              <i ng-if="!user.user.isLog" class="icon ion-record assertive"></i>
             </label>
-            <label class="col col-75">{{user._user.pseudo}} </label>
-            <label class="col col-10">
+            <label class="col col-75">{{user.user.pseudo}} </label>
+            <label ng-if="!user.isfriend" class="col col-10">
               <button class="button button-icon ion-plus" ng-click="openFriend(user)"></button>
             </label>
+            <label ng-if="user.isfriend" class="col col-10">
+              <button class="button button-icon ion-minus" ng-click="openRemoveFriend(user)"></button>
+            </label>
           </ion-item>
-          <ion-item ng-if="user._isfriend" class="item-accordion"
-                    ng-repeat="info in user._info"
-                    ng-show="isUserShown(user)">
+          <ion-item ng-if="user.isfriend" class="item-accordion"
+                    ng-repeat="info in user.info"
+                    ng-show="isUserShown(user)" 
+                    ng-click="infoWindow(info)" 
+                    ng-class="{active: isInfoShown(info)}">
             {{info.date}}
           </ion-item>
         </div>
@@ -76,17 +78,17 @@
             Informations
           </ion-item>
           <ion-item class="item-accordion"
-                    ng-repeat="(key,value) in filterUInfo(profillist._user)"
+                    ng-repeat="(key,value) in filterUInfo(profillist.user)"
                     ng-show="shownUInfo">
             {{key}} : {{value}}
           </ion-item>
         </div>
-        <div ng-if="$storage.isProfilView" ng-repeat="info in profillist._info track by $index">
+        <div ng-if="$storage.isProfilView" ng-repeat="info in profillist.info track by $index">
           <ion-item class="item-stable row row-center"
                     ng-click="toggleInfo(info)"
                     ng-class="{active: isInfoShown(info)}">
             &nbsp;
-            <label class="col col-90">{{info.date}}</label><label class="col col-10"><button class="button button-icon ion-trash-a" ng-click="deleteInfo(info)"></button></label>
+            <label class="col col-80">{{info.date}}</label><label class="col col-10"><button class="button button-icon ion-trash-a" ng-click="deleteInfo(info)"></button></label>
           </ion-item>
           <ion-item class="item-accordion"
                     ng-repeat="(key,value) in filterInfo(info)"

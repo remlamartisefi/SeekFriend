@@ -1,0 +1,14 @@
+<ion-modal-view style="min-height:200px;">
+	<ion-header-bar>
+		<h1 class="title">Remove Friend</h1>
+		<div class="buttons">
+		  <button class="button button-clear" ng-click="closeRemoveFriend()">Close</button>
+		</div>
+	</ion-header-bar>
+	 <ion-content ng-controller="MenuCtrl">
+	 <div class="buttons row row center">
+	    <button ng-if="$storage.islog" class="button button-clear col col-center" ng-click="removeFriend(removeFriendModal.data)">Remove {{removeFriendModal.data.user.pseudo}} from your friends ?</button>
+	    <button ng-if="!$storage.islog" class="button button-clear col col-center" ng-click="openLogin();closeRemoveFriend()">Please log in</button>
+	 </div>
+	</ion-content>
+</ion-modal-view>

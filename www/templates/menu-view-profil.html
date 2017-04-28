@@ -15,10 +15,10 @@
                   ng-class="{active: isUserShown(user)}">
             <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
           &nbsp;
-          {{user._user.pseudo}}
+          {{user.user.pseudo}}
         </ion-item>
         <ion-item class="item-accordion"
-                  ng-repeat="info in user._info"
+                  ng-repeat="info in user.info"
                   ng-show="isUserShown(user)">
           {{info.date}}
         </ion-item>
