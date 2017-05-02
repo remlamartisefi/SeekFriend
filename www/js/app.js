@@ -7,7 +7,7 @@
 angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
 // angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova','angular-md5','ionic-native-transitions'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $rootScope, $location) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -21,6 +21,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+
+    $rootScope.$on('$routeChangeSuccess', function() {
+      $rootScope.showRoute = $location.path() !== "/app/settings";
+      console.log($location.path());
+    });
   });
 })
 

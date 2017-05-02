@@ -15,11 +15,11 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $scope.$storage.isreg = false;
   if($scope.$storage.islog){
     $http.post($scope.$storage.url + '/users/login', {email: $scope.$storage.email})
-    .success(function(response){$scope.$storage.isProfilView = false;console.log("Logged!");})
+    .success(function(response){$scope.$storage.isProfilView = false;console.log(response);console.log("Logged!");})
     .error(function(err, config) {console.log(config);});
   }else{
     $http.post($scope.$storage.url + '/users/logout', {email: $scope.$storage.email})
-    .success(function(response){$scope.$storage.isProfilView = false;})
+    .success(function(response){$scope.$storage.isProfilView = false;console.log(response);})
     .error(function(err, config) {console.log(config);});
     $scope.$storage.isreg = false;
     $scope.$storage.email = '';
@@ -244,13 +244,15 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           if (status == google.maps.GeocoderStatus.OK) {
             $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
             $scope.map.setClickableIcons(true);
-            google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-              $scope.location = new google.maps.Marker({
-                  map: $scope.map,
-                  position: latLng,
-                  icon: pinImage
+            if($scope.map !== undefined){
+              google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+                $scope.location = new google.maps.Marker({
+                    map: $scope.map,
+                    position: latLng,
+                    icon: pinImage
+                });
               });
-            });
+            }
           }
         });
         $ionicLoading.hide(); 
@@ -264,29 +266,38 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       // console.log('refresh');
       // $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
-        // var geocoder = new google.maps.Geocoder();
+        var geocoder = new google.maps.Geocoder();
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        // geocoder.geocode({'latLng': latLng}, function (results, status) {
-          // if (status == google.maps.GeocoderStatus.OK) {
-            google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-              $scope.location.setMap(null);
-              $scope.location = new google.maps.Marker({
-                  map: $scope.map,
-                  position: latLng,
-                  icon: pinImage
+        geocoder.geocode({'latLng': latLng}, function (results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            if($scope.map !== undefined){
+              google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+                $scope.location.setMap(null);
+                $scope.location = new google.maps.Marker({
+                    map: $scope.map,
+                    position: latLng,
+                    icon: pinImage
+                });
               });
-            });
-            if(panTo)
-              $scope.map.panTo(latLng);
-          // }
-        // });
+              if(panTo)
+                $scope.map.panTo(latLng);
+            }
+          }
+        });
       },function(error){console.log("Could not get location");console.log(error);}); 
     });
   };
 
   // every 5 sec refresh the blue point position
-  var theInterval = $interval(function(){$scope.refreshLoc($scope.$storage.panToLocation);}.bind(this), 5000); 
+  var theInterval = $interval(function(){
+    if($scope.$storage.panToLocation !== undefined || $scope.$storage.panToLocation !== null){
+      $scope.refreshLoc($scope.$storage.panToLocation);
+    }else{
+      $scope.$storage.panToLocation = true;
+      $scope.refreshLoc($scope.$storage.panToLocation);
+    }
+  }.bind(this), 5000); 
 
   // add a marker in your database
   $scope.markers = [];
