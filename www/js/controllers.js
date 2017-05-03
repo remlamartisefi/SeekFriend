@@ -244,7 +244,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           if (status == google.maps.GeocoderStatus.OK) {
             $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
             $scope.map.setClickableIcons(true);
-            if($scope.map !== undefined){
+            if($scope.map !== undefined || $scope.map !== null){
               google.maps.event.addListenerOnce($scope.map, 'idle', function(){
                 $scope.location = new google.maps.Marker({
                     map: $scope.map,
@@ -271,7 +271,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         geocoder.geocode({'latLng': latLng}, function (results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
-            if($scope.map !== undefined){
+            if($scope.map !== undefined || $scope.map !== null){
               google.maps.event.addListenerOnce($scope.map, 'idle', function(){
                 $scope.location.setMap(null);
                 $scope.location = new google.maps.Marker({
@@ -328,7 +328,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     .error(function(err, config) {console.log(config);});
   };
 
-  $scope.doRegisterPreviousLocation = function() {
+  $scope.doRegisterPreviousLocation = function(rangeData) {
+    $scope.previousLocationForm.submitted = true; 
     var data = {
       user_id: $scope.$storage.user_id,
       lat: $scope.rangeData.latitude,
