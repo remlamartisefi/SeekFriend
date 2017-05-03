@@ -7,8 +7,12 @@
   </ion-header-bar>
   <ion-content ng-controller="MenuCtrl">
    <div class="buttons">
-      <button class="button button-clear row row-center" ng-click="addLocation();closeAddLocation()">Add your current location</button>
-      <button class="button button-clear row row-center" ng-click="openPreviousLocation();closeAddLocation()">Add a previous location</button>
+      <div class="row row-center col col-center">
+        <button class="button button-clear" ng-click="addLocation();closeAddLocation()">Add your current location</button>
+      </div>
+      <div class="row row-center col col-center">
+        <button class="button button-clear" ng-click="openPreviousLocation();closeAddLocation()">Add a previous location</button>
+      </div>
     </div>
   </ion-content>
 </ion-modal-view>

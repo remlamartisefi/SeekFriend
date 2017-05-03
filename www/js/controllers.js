@@ -1,6 +1,6 @@
 angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
-.controller('AppCtrl', function($scope, $http, $ionicModal, $ionicPopover, $ionicPlatform, $localStorage) {
+.controller('AppCtrl', function($scope, $http, $ionicModal, $ionicPopover, $localStorage) {
   $http.defaults.headers.common["Accept"] = "application/json";
 
   //  $storage initialisation
@@ -15,11 +15,11 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $scope.$storage.isreg = false;
   if($scope.$storage.islog){
     $http.post($scope.$storage.url + '/users/login', {email: $scope.$storage.email})
-    .success(function(response){$scope.$storage.isProfilView = false;console.log(response);console.log("Logged!");})
+    .success(function(response){$scope.$storage.isProfilView = false;console.log("Logged!");})
     .error(function(err, config) {console.log(config);});
   }else{
     $http.post($scope.$storage.url + '/users/logout', {email: $scope.$storage.email})
-    .success(function(response){$scope.$storage.isProfilView = false;console.log(response);})
+    .success(function(response){$scope.$storage.isProfilView = false;})
     .error(function(err, config) {console.log(config);});
     $scope.$storage.isreg = false;
     $scope.$storage.email = '';
@@ -266,25 +266,25 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       // console.log('refresh');
       // $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
-        var geocoder = new google.maps.Geocoder();
+        // var geocoder = new google.maps.Geocoder();
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        geocoder.geocode({'latLng': latLng}, function (results, status) {
-          if (status == google.maps.GeocoderStatus.OK) {
-            if($scope.map !== undefined || $scope.map !== null){
-              google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+        // geocoder.geocode({'latLng': latLng}, function (results, status) {
+          // if (status == google.maps.GeocoderStatus.OK) {
+            if($scope.location !== undefined){
+              // google.maps.event.addListenerOnce($scope.map, 'idle', function(){
                 $scope.location.setMap(null);
                 $scope.location = new google.maps.Marker({
                     map: $scope.map,
                     position: latLng,
                     icon: pinImage
                 });
-              });
+              // });
               if(panTo)
                 $scope.map.panTo(latLng);
             }
-          }
-        });
+          // }
+        // });
       },function(error){console.log("Could not get location");console.log(error);}); 
     });
   };
@@ -329,20 +329,21 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   };
 
   $scope.doRegisterPreviousLocation = function(rangeData) {
-    $scope.previousLocationForm.submitted = true; 
     var data = {
       user_id: $scope.$storage.user_id,
       lat: $scope.rangeData.latitude,
       lng: $scope.rangeData.longitude, 
       date: $scope.rangeData.date
     };
-    if($scope.rangeData.longitude > -31 && $scope.rangeData.longitude < 115 && $scope.rangeData.latitude < 41 && $scope.rangeData.latitude > -120 ){
+    // console.log(data);
+    if(($scope.rangeData.longitude > -31) && ($scope.rangeData.longitude < 115) && ($scope.rangeData.latitude < 50) && ($scope.rangeData.latitude > -120) ){
       $http.post($scope.$storage.url + '/coords/add', data).success(function(response){
         console.log('Adding a Coord');
         $scope.refreshMenuData();
+        $scope.closePreviousLocation(); 
       }).error(function(err, config) {console.log(config);});
-   }
-  };
+    }
+   };
 
   // show a marker from the database
   $scope.showLocation = function(info){
