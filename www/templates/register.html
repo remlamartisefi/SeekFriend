@@ -9,7 +9,7 @@
     </div>
   </ion-header-bar>
   <ion-content ng-controller="SignCtrl">
-    <form name="registerForm" data-ng-click="doRegister(registerData)">
+    <form name="registerForm" ng-submit="doRegister(registerData)">
       <div class="list">
         <label class="item item-input" style="border-bottom-width: 0px;">
           <span class="input-label">Email</span>

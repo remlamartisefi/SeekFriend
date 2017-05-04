@@ -18,9 +18,11 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     .success(function(response){$scope.$storage.isProfilView = false;console.log("Logged!");})
     .error(function(err, config) {console.log(config);});
   }else{
-    $http.post($scope.$storage.url + '/users/logout', {email: $scope.$storage.email})
-    .success(function(response){$scope.$storage.isProfilView = false;})
-    .error(function(err, config) {console.log(config);});
+    if($scope.$storage.email.length != 0){
+      $http.post($scope.$storage.url + '/users/logout', {email: $scope.$storage.email})
+      .success(function(response){$scope.$storage.isProfilView = false;})
+      .error(function(err, config) {console.log(config);});
+    }
     $scope.$storage.isreg = false;
     $scope.$storage.email = '';
     $scope.$storage.password = '';
@@ -39,10 +41,11 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $ionicModal.fromTemplateUrl('templates/logout.html', {scope: $scope}).then(function(modal) {$scope.logout = modal;});
   $ionicModal.fromTemplateUrl('templates/addFriendModal.html', {scope: $scope}).then(function(modal) {$scope.addFriendModal = modal;});
   $ionicModal.fromTemplateUrl('templates/removeFriendModal.html', {scope: $scope}).then(function(modal) {$scope.removeFriendModal = modal;});
-  $ionicPopover.fromTemplateUrl('templates/my-popover.html', {scope: $scope}).then(function(popover) {$scope.popover = popover;});
-  $ionicPopover.fromTemplateUrl('templates/popoverMenu.html', {scope: $scope}).then(function(popover) {$scope.popoverMenu = popover;});
+  $ionicModal.fromTemplateUrl('templates/removeInfoModal.html', {scope: $scope}).then(function(modal) {$scope.removeInfoModal = modal;});
   $ionicModal.fromTemplateUrl('templates/addLocation.html', {scope: $scope}).then(function(modal) {$scope.addLocationModal = modal;});
   $ionicModal.fromTemplateUrl('templates/previousLocation.html', {scope: $scope}).then(function(modal) {$scope.previousLocationModal = modal;});
+  $ionicPopover.fromTemplateUrl('templates/set-server-url.html', {scope: $scope}).then(function(popover) {$scope.popoverUrl = popover;});
+  $ionicPopover.fromTemplateUrl('templates/popoverMenu.html', {scope: $scope}).then(function(popover) {$scope.popoverMenu = popover;});
 
   // Triggered in the login or register modal to close it
   $scope.closeLogin = function() {$scope.login.hide();};
@@ -53,14 +56,16 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $scope.openGeo = function() {$scope.enableGeoloc.show();};
   $scope.closeLogout = function() {$scope.logout.hide();};
   $scope.openLogout = function() {$scope.logout.show();};
-  $scope.openPopover = function($event) {$scope.popover.show($event);};
-  $scope.closePopover = function() {$scope.popover.hide();};  
+  $scope.openPopoverUrl = function($event) {$scope.popoverUrl.show($event);};
+  $scope.closePopoverUrl = function() {$scope.popoverUrl.hide();};  
   $scope.openPopoverMenu = function($event) {$scope.popoverMenu.show($event);};
   $scope.closePopoverMenu = function() {$scope.popoverMenu.hide();};
   $scope.closeFriend = function() {$scope.addFriendModal.hide();};
   $scope.openFriend = function(user) {$scope.addFriendModal.show();$scope.addFriendModal.data = user;};
   $scope.closeRemoveFriend = function() {$scope.removeFriendModal.hide();};
-  $scope.openRemoveFriend = function(user) {$scope.removeFriendModal.show();$scope.removeFriendModal.data = user;};
+  $scope.openRemoveFriend = function(user) {$scope.removeFriendModal.show();$scope.removeFriendModal.data = user;}; 
+  $scope.closeRemoveInfo = function() {$scope.removeInfoModal.hide();};
+  $scope.openRemoveInfo = function(info) {$scope.removeInfoModal.show();$scope.removeInfoModal.info = info;};
   $scope.closePreviousLocation = function() {$scope.previousLocationModal.hide();};
   $scope.openPreviousLocation = function() {$scope.previousLocationModal.show();};
   $scope.closeAddLocation = function() {$scope.addLocationModal.hide();};
@@ -68,9 +73,13 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   // Switch Modal View
   $scope.register_view = function(){$scope.closeLogin();$scope.openRegister();};
   $scope.login_view = function(){$scope.closeRegister();$scope.openLogin();};
-  $scope.logout_view = function(){$scope.closeLogout();$scope.openLogout();};
-  $scope.addLocation_view = function(){$scope.closeAddLocation();$scope.openAddLocation();};
-  $scope.previousLocation_view = function(){$scope.openPreviousLocation();$scope.openPreviousLocation();};
+  // $scope.logout_view = function(){$scope.closeLogout();$scope.openLogout();};
+  // $scope.addLocation_view = function(){$scope.closeAddLocation();$scope.openPreviousLocation();};
+  // $scope.previousLocation_view = function(){$scope.openPreviousLocation();$scope.openPreviousLocation();};
+
+  // Fix bug prerequisite you open a popover and a modal that's in a link in the popover
+  // When you hide this modal the popover is still open and touch / click is disable
+  $scope.$on('modal.hidden', function () {$scope.popoverMenu.hide();});
 })
 
 .controller('SignCtrl',function($scope,$timeout,$http, $sessionStorage){
@@ -211,7 +220,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   };
 })
 
-.controller('MenuCtrl', function($scope, $ionicPopup, $ionicHistory, 
+.controller('MenuCtrl', function($scope, $rootScope, $ionicPopup, $ionicHistory, 
   $ionicPlatform, $cordovaGeolocation, $ionicLoading, $state, $interval, 
   $ionicPopover, $http, $timeout, $ionicSideMenuDelegate) {
   $http.defaults.headers.common["Accept"] = "application/json";
@@ -221,13 +230,19 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     if($ionicHistory.currentView().url != "/app/settings")
       // $ionicConfig.views.transition('platform');
       $state.go('app.settings');
-    else
-      $ionicHistory.goBack();
+    // else
+    //   $ionicHistory.goBack();
+  };
+  $scope.isMapView = function(){
+    if($ionicHistory.currentView().url == "/app/map")
+      return true;
+    else 
+      return false;
   };
 
   // handle map ------------------------------------------------------------------------------------------
   var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(8, 8), new google.maps.Size(16,16));
-  var options = {timeout: 100000, enableHighAccuracy: true,maximumAge: 0}; 
+  var options = {timeout: 20000, enableHighAccuracy: true,maximumAge: 0}; 
   $scope.refreshMap = function(){
     $ionicPlatform.ready(function(){
       $ionicLoading.show({template: '<ion-spinner icon="ripple"></ion-spinner><br/>Acquiring location !'});
@@ -242,12 +257,12 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         };
         geocoder.geocode({'latLng': latLng}, function (results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
-            $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
-            $scope.map.setClickableIcons(true);
-            if($scope.map !== undefined || $scope.map !== null){
-              google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+            $rootScope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            $rootScope.map.setClickableIcons(true);
+            if($rootScope.map !== undefined || $rootScope.map !== null){
+              google.maps.event.addListener($rootScope.map, 'idle', function(){
                 $scope.location = new google.maps.Marker({
-                    map: $scope.map,
+                    map: $rootScope.map,
                     position: latLng,
                     icon: pinImage
                 });
@@ -275,13 +290,13 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
               // google.maps.event.addListenerOnce($scope.map, 'idle', function(){
                 $scope.location.setMap(null);
                 $scope.location = new google.maps.Marker({
-                    map: $scope.map,
+                    map: $rootScope.map,
                     position: latLng,
                     icon: pinImage
                 });
               // });
               if(panTo)
-                $scope.map.panTo(latLng);
+                $rootScope.map.panTo(latLng);
             }
           // }
         // });
@@ -335,7 +350,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       lng: $scope.rangeData.longitude, 
       date: $scope.rangeData.date
     };
-    // console.log(data);
+    // console.log(data); 
     if(($scope.rangeData.longitude > -31) && ($scope.rangeData.longitude < 115) && ($scope.rangeData.latitude < 50) && ($scope.rangeData.latitude > -120) ){
       $http.post($scope.$storage.url + '/coords/add', data).success(function(response){
         console.log('Adding a Coord');
@@ -636,7 +651,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   var theInterval = $interval(function(){$scope.refreshMenuData();}.bind(this),30000);   
 
   // just show what we store -------------------------------------------------------------------------------
-  $scope.showStorage = function($event){console.log($scope.$storage);$scope.openPopover($event);};
+  $scope.showStorage = function($event){console.log($scope.$storage);$scope.openPopoverUrl($event);};
 
   // delete a position from backend ------------------------------------------------------------------------
   $scope.deleteInfo = function(info){
@@ -686,16 +701,16 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   };
 })
 
-.controller('PlaylistsCtrl', function($scope) {
-  $scope.playlists = [
-    { title: 'Reggae', id: 1 },
-    { title: 'Chill', id: 2 },
-    { title: 'Dubstep', id: 3 },
-    { title: 'Indie', id: 4 },
-    { title: 'Rap', id: 5 },
-    { title: 'Cowbell', id: 6 }
-  ];
-})
+// .controller('PlaylistsCtrl', function($scope) {
+//   $scope.playlists = [
+//     { title: 'Reggae', id: 1 },
+//     { title: 'Chill', id: 2 },
+//     { title: 'Dubstep', id: 3 },
+//     { title: 'Indie', id: 4 },
+//     { title: 'Rap', id: 5 },
+//     { title: 'Cowbell', id: 6 }
+//   ];
+// })
 
-.controller('PlaylistCtrl', function($scope, $stateParams) {
-});
+// .controller('PlaylistCtrl', function($scope, $stateParams) {
+// });

@@ -8,8 +8,7 @@
         </button>
       </ion-nav-buttons>
       <ion-nav-buttons side="right">
-        <!-- <a class="button button-icon icon ion-ios-arrow-down" ng-click="openPopoverMenu($event)"></a>  -->
-        <a class="button button-icon icon ion-android-more-vertical" ng-click="openPopoverMenu($event)"></a>
+        <a ng-if="isMapView()" class="button button-icon icon ion-android-more-vertical" ng-click="openPopoverMenu($event)"></a>
       </ion-nav-buttons>
     </ion-nav-bar>
     <ion-nav-view name="menuContent"></ion-nav-view>
@@ -39,7 +38,6 @@
           <ion-item class="item-stable row row-center"
                     ng-click="toggleUser(user)"
                     ng-class="{active: isUserShown(user)}">
-              <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
             &nbsp;
             <label class="col col-10">
               <i ng-if="user.user.isLog" class="icon ion-record balanced"></i>
@@ -73,7 +71,6 @@
           <ion-item class="item-stable"
                     ng-click="toggleUInfo()"
                     ng-class="{active: shownUInfo}">
-              <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
             &nbsp;
             Informations
           </ion-item>
@@ -88,7 +85,7 @@
                     ng-click="toggleInfo(info)"
                     ng-class="{active: isInfoShown(info)}">
             &nbsp;
-            <label class="col col-80">{{info.date}}</label><label class="col col-10"><button class="button button-icon ion-trash-a" ng-click="deleteInfo(info)"></button></label>
+            <label class="col col-80">{{info.date}}</label><label class="col col-10"><button class="button button-icon ion-trash-a" ng-click="openRemoveInfo(info)"></button></label>
           </ion-item>
           <ion-item class="item-accordion"
                     ng-repeat="(key,value) in filterInfo(info)"
@@ -105,11 +102,6 @@
   </ion-side-menu>
 </ion-side-menus>
 
-
-<!--       <ion-item menu close ng-repeat="user in pseudolist" ng-click="getAllCoord(user)">
-          {{user.pseudo}}
-        </ion-item>
- -->
 <!--         
         <ion-searchbar ng-model="search"
             showCancelButton="shouldShowCancel"
