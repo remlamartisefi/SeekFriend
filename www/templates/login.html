@@ -35,6 +35,8 @@
         </label>
         <label class="item" style="border-bottom-width: 0px;">
           <button class="button button-block button-positive" type="submit">Log in</button>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="!loginForm.$error">
+            Email or password invalid</span>
         </label>
       </div>
     </form>

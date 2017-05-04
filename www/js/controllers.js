@@ -3,31 +3,44 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
 .controller('AppCtrl', function($scope, $http, $ionicModal, $ionicPopover, $localStorage) {
   $http.defaults.headers.common["Accept"] = "application/json";
 
-  //  $storage initialisation
+  // $storage initialisation -----------------------------------------------------------------
   $scope.$storage = $localStorage;
-  $scope.$storage.url = 'http://mlollo.rmorpheus.enseirb.fr';
+  // $scope.$storage.url = 'http://mlollo.rmorpheus.enseirb.fr';
+  $scope.$storage.url = 'http://localhost:8080';
   $scope.$storage.panToLocation = true;
-  // $scope.$storage.url = 'http://b96e1293.ngrok.io';
 
   if("undefined" === typeof $scope.$storage.islog)
     $scope.$storage.islog = false;
   if("undefined" === typeof $scope.$storage.isreg)
     $scope.$storage.isreg = false;
   if($scope.$storage.islog){
-    $http.post($scope.$storage.url + '/users/login', {email: $scope.$storage.email})
-    .success(function(response){$scope.$storage.isProfilView = false;console.log("Logged!");})
+    $http.post($scope.$storage.url + '/users/login', {email: $scope.$storage.email,password: $scope.$storage.password})
+    .success(function(response){
+      if(response.valid){
+        $scope.$storage.user_id = response.user._id;
+        $scope.$storage.token = response.token;
+        $scope.$storage.isProfilView = false;
+        console.log("Logged!");
+      }else{
+        console.log("login error !")
+      }
+    })
     .error(function(err, config) {console.log(config);});
   }else{
-    if($scope.$storage.email.length != 0){
+    if($scope.$storage.email.length != 0 && $scope.$storage.token.length != 0){
+      $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
       $http.post($scope.$storage.url + '/users/logout', {email: $scope.$storage.email})
-      .success(function(response){$scope.$storage.isProfilView = false;})
+      .success(function(response){
+        $scope.$storage.isProfilView = false;
+        $scope.$storage.isreg = false;
+        $scope.$storage.email = '';
+        $scope.$storage.password = '';
+        $scope.$storage.pseudo = '';
+        $scope.$storage.user_id = '';
+        $scope.$storage.token = '';
+      })
       .error(function(err, config) {console.log(config);});
     }
-    $scope.$storage.isreg = false;
-    $scope.$storage.email = '';
-    $scope.$storage.password = '';
-    $scope.$storage.pseudo = '';
-    $scope.$storage.user_id = '';
   }
 
   $scope.$storage.dataSearch = {search : ""};
@@ -98,7 +111,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $scope.loginForm.submitted = true;
 
     var data = {
-      email : $scope.loginData.email
+      email : $scope.loginData.email,
+      password: $scope.loginData.password
     };
 
     if($scope.loginForm.submitted 
@@ -110,36 +124,36 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       && !$scope.loginForm.Password.$error.maxlength)
     {
 
-      $http.post($scope.$storage.url + '/users/getbyemail', data)
+      $http.post($scope.$storage.url + '/users/login', data)
         .success(function(response){
-          if(response.length == 1 && response[0].password == $scope.loginData.password){
-            $scope.$storage.email = response[0].email;
-            $scope.$storage.pseudo = response[0].pseudo;
-            $scope.$storage.user_id = response[0]._id;
-
-            $http.post($scope.$storage.url + '/users/login', data)
-              .success(function(response){
-                console.log('Doing Login');
-                // console.log(response);
-                $scope.$storage.islog = true;
-                $scope.$storage.isProfilView = false;
-                $scope.closeLogin();
-              }).error(function(err, config) {console.log(config);});
+          console.log(response);
+          if(response.valid){
+            $scope.$storage.email = response.user.email;
+            $scope.$storage.pseudo = response.user.pseudo;
+            $scope.$storage.user_id = response.user._id;
+            $scope.$storage.token = response.token;
+            console.log('Doing Login');
+            // console.log(response);
+            $scope.$storage.islog = true;
+            $scope.$storage.isProfilView = false;
+            $scope.closeLogin();
           }else{
             $scope.loginForm.$error = false;
           }
-        }).error(function(err, config) {console.log(config);});  
+        }).error(function(err, config) {console.log(config);$scope.loginForm.invalid = true;
+});  
     }    
-    $timeout(function() {
-      $scope.closeLogin();
-    }, 60000);
+    // $timeout(function() {
+    //   $scope.closeLogin();
+    // }, 60000);
   };
 
   $scope.doLogout = function() {
-     var data = {
-        email : $scope.$storage.email
-      };
-      console.log(data);
+    $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
+    var data = {
+      email : $scope.$storage.email
+    };
+    console.log(data);
     $http.post($scope.$storage.url + '/users/logout', data)
       .success(function(response){
         console.log('Doing Logout');
@@ -147,7 +161,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         $scope.$storage.email = '';
         $scope.$storage.password = '';
         $scope.$storage.pseudo = '';
-        $scope.$storage.user_id = '';       
+        $scope.$storage.user_id = '';
+        $scope.$storage.token = '';       
         $scope.$storage.islog = false;
         $scope.$storage.isreg = false;
         if($scope.markers){
@@ -175,23 +190,17 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       && !$scope.registerForm.Password.$error.minlength
       && !$scope.registerForm.Password.$error.maxlength)
     {
-      $http.post($scope.$storage.url + '/users/getbyemailnpseudo', data)
+      $http.post($scope.$storage.url + '/users/add', data)
         .success(function(response){
-          if(response.length == 0){
-            $http.post($scope.$storage.url + '/users/add', data)
-              .success(function(response){
-                console.log('Doing Register');
-                $scope.$storage.isreg = true;
-                $scope.closeRegister(); 
-              }).error(function(err, config) {console.log(config);});
+          if(!response.invalid){
+            console.log('Doing Register');
+            $scope.$storage.isreg = true;
+            $scope.closeRegister(); 
           }else{
             $scope.registerForm.$error = false;
           }
-        }).error(function(err, config) {console.log(config);}); 
+        }).error(function(err, config) {console.log(config);});
     }
-    $timeout(function() {
-      $scope.closeRegister();
-    }, 60000);
   };
 })
 
@@ -232,10 +241,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   // settings option -------------------------------------------------------------------------------------
   $scope.settings = function() {
     if($ionicHistory.currentView().url != "/app/settings")
-      // $ionicConfig.views.transition('platform');
       $state.go('app.settings');
-    // else
-    //   $ionicHistory.goBack();
   };
   $scope.isMapView = function(){
     if($ionicHistory.currentView().url == "/app/map")
@@ -288,6 +294,10 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       }, function(error){console.log("Could not get location");console.log(error);$ionicLoading.hide();$scope.openGeo();});
     });
   };
+  $scope.reloadMap = function(){
+    console.log('reload');
+    $state.go($state.current, {}, {reload: true});
+  };
 
   // refresh only the blue point location
   $scope.refreshLoc = function(panTo){
@@ -339,7 +349,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $scope.markers[$scope.markers.length-1].addListener('click', function() {
       $scope.infowindows[$scope.infowindows.length-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
     });
-
+    $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
     $http.post($scope.$storage.url + '/coords/add', data)
     .success(function(response){
       console.log('Adding a Coord');
@@ -366,6 +376,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.infowindows[$scope.infowindows.length-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
     });
     if(($scope.rangeData.longitude > -31) && ($scope.rangeData.longitude < 115) && ($scope.rangeData.latitude < 50) && ($scope.rangeData.latitude > -120) ){
+      $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
       $http.post($scope.$storage.url + '/coords/add', data).success(function(response){
         console.log('Adding a Coord');
         $scope.refreshMenuData();
@@ -447,7 +458,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $scope.filterUInfo = function(user){
     var result = {};
     for(var key in user) {
-        if(!key.startsWith("_")) {
+        if(!key.startsWith("_") && !key.startsWith("password") && !key.startsWith("isLog")){
             result[key] = user[key];
         }
     }
@@ -501,7 +512,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       response.forEach(function(value,key){
         if(value._id != $scope.$storage.user_id){
           var data = {friends1 : $scope.$storage.user_id,friends2 : value._id};
-          
+          $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
           $http.post($scope.$storage.url + '/friends/isfriend',data).success(function(response){
             if(response.isfriend){
               
@@ -535,6 +546,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $scope.onSearchInput = function(data){
     $scope.userlist = [];
     $scope.shownUser = null;
+    $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
+
     $http.post($scope.$storage.url + '/users/getbypseudo',{pseudo : data.search}).success(function(response){
 
       response.forEach(function(value,key){
@@ -569,6 +582,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     // console.log(data.search);
     // $scope.$broadcast('scroll.refreshStarted');
     $scope.shownInfo = null;
+    $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
 
     $http.post($scope.$storage.url + '/coords/getbydate',{user_id: $scope.$storage.user_id, date: data.search}).success(function(res){
       if(res.length != 0){
@@ -587,7 +601,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
   // equivalent of refresh friends list for coords in the profil view --------------------------------------
   $scope.onProfil = function(data){
-    
+        $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
+
     $http.post($scope.$storage.url + '/users/getbypseudo',{pseudo : data.search}).success(function(response){
       if(response.length == 1){
 
@@ -657,7 +672,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
     },5000);
   }else
-    $scope.reloadFriendsList();  
+    $scope.reloadFriendsList(); 
 
   // every 100 sec. reload the view of the sidebar menu
   var theInterval = $interval(function(){$scope.refreshMenuData();}.bind(this),30000);   
@@ -667,6 +682,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
   // delete a position from backend ------------------------------------------------------------------------
   $scope.deleteInfo = function(info){
+    $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
     $http.post($scope.$storage.url + '/coords/rm',{id : info._id})
     .success(function(response){
       console.log("deleted !");
@@ -687,7 +703,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       friends1 : $scope.$storage.user_id,
       friends2 : user.user._id
     };
-    
+    $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
+
     $http.post($scope.$storage.url + '/users/getbyid', {user_id: user.user._id}).success(function(response){
       
       $http.post($scope.$storage.url + '/friends/addfriend', data).success(function(response){
@@ -704,26 +721,12 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       friends1 : $scope.$storage.user_id,
       friends2 : user.user._id
     };
-    
+    $http.defaults.headers.common["Authorization"] = "Bearer " + $scope.$storage.token;
+
     $http.post($scope.$storage.url + '/friends/removeFriend', data).success(function(response){
       console.log('Remove Friend'); 
       $scope.closeRemoveFriend();
     }).error(function(err, config) {console.log(config);});
     // $timeout(function() {$scope.refreshMenuData(); }, 1000);
-
   };
-})
-
-// .controller('PlaylistsCtrl', function($scope) {
-//   $scope.playlists = [
-//     { title: 'Reggae', id: 1 },
-//     { title: 'Chill', id: 2 },
-//     { title: 'Dubstep', id: 3 },
-//     { title: 'Indie', id: 4 },
-//     { title: 'Rap', id: 5 },
-//     { title: 'Cowbell', id: 6 }
-//   ];
-// })
-
-// .controller('PlaylistCtrl', function($scope, $stateParams) {
-// });
+});
