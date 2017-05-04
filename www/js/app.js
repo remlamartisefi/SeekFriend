@@ -4,10 +4,10 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
 
-angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
+angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova','ngStorage'])
 // angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova','angular-md5','ionic-native-transitions'])
 
-.run(function($ionicPlatform, $location) {
+.run(['$ionicPlatform', '$location', '$localStorage','$http',function($ionicPlatform, $location, $localStorage, $http) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -20,7 +20,11 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova'])
       StatusBar.styleDefault();
     }
   });
-})
+
+  window.onunload = function(){
+    $http.post($localStorage.url + '/users/logout', {email: $localStorage.email});
+  }
+}])
 
 .config(function($stateProvider, $urlRouterProvider, $compileProvider) {
   // $ionicNativeTransitions.enable(true);

@@ -150,6 +150,10 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         $scope.$storage.user_id = '';       
         $scope.$storage.islog = false;
         $scope.$storage.isreg = false;
+        if($scope.markers){
+          $scope.markers.forEach(function(value,key){value.setMap(null);})
+          $scope.markers = [];
+        }
         $scope.closeLogout();
       }).error(function(err, config) {console.log(config);});
   };
@@ -239,6 +243,16 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     else 
       return false;
   };
+  $scope.recenterMap = function(){
+    if(!$scope.$storage.panToLocation){
+      $scope.$storage.panToLocation = true;
+    }
+    if($scope.shownInfo !== null){
+      $scope.toggleInfo($scope.shownInfo);
+    }else{
+      $scope.refreshLoc();
+    }
+  };
 
   // handle map ------------------------------------------------------------------------------------------
   var pinImage = new google.maps.MarkerImage( './img/geo2.png' , null, null, new google.maps.Point(8, 8), new google.maps.Size(16,16));
@@ -261,7 +275,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
             $rootScope.map.setClickableIcons(true);
             if($rootScope.map !== undefined || $rootScope.map !== null){
               google.maps.event.addListener($rootScope.map, 'idle', function(){
-                $scope.location = new google.maps.Marker({
+                $rootScope.location = new google.maps.Marker({
                     map: $rootScope.map,
                     position: latLng,
                     icon: pinImage
@@ -278,28 +292,19 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   // refresh only the blue point location
   $scope.refreshLoc = function(panTo){
     $ionicPlatform.ready(function(){
-      // console.log('refresh');
-      // $ionicLoading.show({template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'});
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
-        // var geocoder = new google.maps.Geocoder();
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        // geocoder.geocode({'latLng': latLng}, function (results, status) {
-          // if (status == google.maps.GeocoderStatus.OK) {
-            if($scope.location !== undefined){
-              // google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-                $scope.location.setMap(null);
-                $scope.location = new google.maps.Marker({
-                    map: $rootScope.map,
-                    position: latLng,
-                    icon: pinImage
-                });
-              // });
-              if(panTo)
-                $rootScope.map.panTo(latLng);
-            }
-          // }
-        // });
+        if($rootScope.location !== undefined){
+            $rootScope.location.setMap(null);
+            $rootScope.location = new google.maps.Marker({
+                map: $rootScope.map,
+                position: latLng,
+                icon: pinImage
+            });
+          if(panTo)
+            $rootScope.map.panTo(latLng);
+        }
       },function(error){console.log("Could not get location");console.log(error);}); 
     });
   };
@@ -316,25 +321,25 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
 
   // add a marker in your database
   $scope.markers = [];
-  $scope. infowindows = [];
+  $scope.infowindows = [];
   $scope.addLocation = function(){
-    var latLng = new google.maps.LatLng($scope.location.position.lat(), $scope.location.position.lng());
+    var latLng = new google.maps.LatLng($rootScope.location.position.lat(), $rootScope.location.position.lng());
     $scope.markers.push(new google.maps.Marker({
-        map: $scope.map,
+        map: $rootScope.map,
         position:  latLng,
         animation: google.maps.Animation.DROP
     }));
-    $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+info.date+"</label></div>"}));  
-    $scope.markers[$scope.markers.length-1].addListener('click', function() {
-      $scope.infowindows[$scope.infowindows-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
-    });
-    // console.log($scope.markers[$scope.markers.length - 1]);
     var data = {
       user_id: $scope.$storage.user_id,
-      lat: $scope.location.position.lat(),
-      lng: $scope.location.position.lng(),
+      lat: $rootScope.location.position.lat(),
+      lng: $rootScope.location.position.lng(),
       date: new Date().toLocaleString()
     };
+    $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+data.date+"</label></div>"}));  
+    $scope.markers[$scope.markers.length-1].addListener('click', function() {
+      $scope.infowindows[$scope.infowindows.length-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
+    });
+
     $http.post($scope.$storage.url + '/coords/add', data)
     .success(function(response){
       console.log('Adding a Coord');
@@ -344,13 +349,22 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   };
 
   $scope.doRegisterPreviousLocation = function(rangeData) {
+    var latLng = new google.maps.LatLng($rootScope.location.position.lat(), $rootScope.location.position.lng());
+    $scope.markers.push(new google.maps.Marker({
+        map: $rootScope.map,
+        position:  latLng,
+        animation: google.maps.Animation.DROP
+    }));
     var data = {
       user_id: $scope.$storage.user_id,
       lat: $scope.rangeData.latitude,
       lng: $scope.rangeData.longitude, 
       date: $scope.rangeData.date
     };
-    // console.log(data); 
+    $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+data.date+"</label></div>"}));  
+    $scope.markers[$scope.markers.length-1].addListener('click', function() {
+      $scope.infowindows[$scope.infowindows.length-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
+    });
     if(($scope.rangeData.longitude > -31) && ($scope.rangeData.longitude < 115) && ($scope.rangeData.latitude < 50) && ($scope.rangeData.latitude > -120) ){
       $http.post($scope.$storage.url + '/coords/add', data).success(function(response){
         console.log('Adding a Coord');
@@ -397,13 +411,11 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     return userlist;
   };
 
-
   $scope.toggleInfo = function(info) {
     $scope.markers.forEach(function(value,key){value.setMap(null);});
     $scope.markers = [];
     if($scope.isInfoShown(info)) {
       $scope.shownInfo = null;
-      $scope.$storage.panToLocation = true;
       $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
     } else {
       $ionicSideMenuDelegate.toggleLeft(false);
@@ -662,6 +674,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         if(val._id === info._id){
           console.log(val._id);
           arr.splice(index,1);
+          $scope.closeRemoveInfo();
         }
       });
     }).error(function(err, config) {console.log(config);});

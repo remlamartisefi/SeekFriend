@@ -8,6 +8,7 @@
         </button>
       </ion-nav-buttons>
       <ion-nav-buttons side="right">
+        <a ng-if="isMapView()" class="button button-icon icon ion-android-locate pull-right" ng-click="recenterMap()"></a>
         <a ng-if="isMapView()" class="button button-icon icon ion-android-more-vertical" ng-click="openPopoverMenu($event)"></a>
       </ion-nav-buttons>
     </ion-nav-bar>
