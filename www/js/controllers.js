@@ -15,8 +15,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     $scope.$storage.token = '';
   }
   $scope.initStorage = function(){
-    // $scope.$storage.url = 'http://mlollo.rmorpheus.enseirb.fr';
-    $scope.$storage.url = 'http://localhost:8080';
+    $scope.$storage.url = 'http://mlollo.rmorpheus.enseirb.fr';
+    // $scope.$storage.url = 'http://localhost:8080';
     $scope.$storage.panToLocation = true;
     $scope.$storage.remember = false;
     if(typeof $scope.$storage.islog == undefined){
