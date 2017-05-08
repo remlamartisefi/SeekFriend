@@ -62,7 +62,7 @@
         </div>
         <ion-item menu close ng-if="$storage.isProfilView" class="row">
           <label class="item-input col col-90">
-            <input type="search" id="search-profil" placeholder="Search a date" ng-model="$storage.dataSearch.search" ng-focus="$storage.searchFocused = true" ng-blur="$storage.searchFocused = false" ng-change="onSearchInputProfil($storage.dataSearch)" class="full-width" close>
+            <input type="search" id="search-profil" placeholder="Search a date" ng-model="$storage.dataSearch.search" ng-focus="$storage.searchFocused = true" ng-blur="$storage.searchFocused = false" ng-change="onProfil($storage.dataSearch)" class="full-width" close>
           </label>
           <label class="item-input col col-10">
             <button ng-if="$storage.dataSearch.search.length" class="button button-icon ion-android-close input-button button-small" ng-click="onSearchCancelProfil($storage.dataSearch)"></button>

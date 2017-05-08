@@ -6,13 +6,13 @@
     </div>
   </ion-header-bar>
   <ion-content ng-controller="MenuCtrl">
-   <div class="buttons" layout="row">
-      <div>
+    <div class="list">
+      <label class="item item-input" style="border-top-width: 0px;">
         <button class="button button-clear" ng-click="addLocation();closeAddLocation()">Add your current location</button>
-      </div>
-      <div layout="column" layout-align="center center">
+      </label>      
+      <label class="item item-input" style="border-top-width: 0px;">
         <button class="button button-clear" ng-click="openPreviousLocation();closeAddLocation()">Add a previous location</button>
-      </div>
+      </label>
     </div>
   </ion-content>
 </ion-modal-view>

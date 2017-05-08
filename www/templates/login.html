@@ -33,9 +33,14 @@
           <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$error.maxlength">
             Password is too long</span>
         </label>
+        <ion-toggle 
+                ng-model="$storage.remember"
+                ng-checked="$storage.remember">
+            Remember me ?
+        </ion-toggle>
         <label class="item" style="border-bottom-width: 0px;">
           <button class="button button-block button-positive" type="submit">Log in</button>
-          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="!loginForm.$error">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="!loginForm.$error || loginForm.invalid">
             Email or password invalid</span>
         </label>
       </div>

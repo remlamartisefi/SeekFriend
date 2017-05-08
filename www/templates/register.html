@@ -33,7 +33,7 @@
         </label>
         <label class="item item-input" style="border-bottom-width: 0px;">
           <span class="input-label">Password</span>
-          <input id="password" style="margin-right:20px;" type="password" name="Password" placeholder="Password" data-ng-model="registerData.password" data-ng-minlength="3 " data-ng-maxlength="32" required>
+          <input id="password" style="margin-right:20px;" type="password" name="Password" placeholder="Password" data-ng-model="registerData.password" data-ng-minlength="3" data-ng-maxlength="32" required>
         </label>
         <label class="item item-input" style="border-top-width: 0px;">
           <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Password.$invalid && !registerForm.Password.$error.minlength && !registerForm.Password.$error.maxlength">
@@ -43,12 +43,20 @@
           <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.submitted && registerForm.Password.$error.maxlength">
             Password is too long</span>
         </label>
+        <label class="item item-input" style="border-bottom-width: 0px;">
+          <span class="input-label">Confirm Password</span>
+          <input id="password2" style="margin-right:20px;" type="password" name="Password" placeholder="Confirm Password" data-ng-model="registerData.password2" required>
+        </label>
         <label class="item" style="border-bottom-width: 0px;">
           <button class="button button-block button-positive" type="submit">Register</button>
         </label>
         <label class="item item-input" style="border-top-width: 0px;border-bottom-width: 0px;">
-          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="!registerForm.$error">
-             This email and pseudo if already used</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.different">
+             The passwords are different</span>
+        </label>
+        <label class="item item-input" style="border-top-width: 0px;border-bottom-width: 0px;">
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="registerForm.invalid">
+            Email or pseudo already used</span>
         </label>
       </div>
     </form>

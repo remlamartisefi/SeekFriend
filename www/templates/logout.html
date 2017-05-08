@@ -6,8 +6,15 @@
 		</div>
 	</ion-header-bar>
 	 <ion-content ng-controller="SignCtrl">
-	 <div class="buttons row row center">
-	    <button class="button button-clear col col-center" ng-click="doLogout()">Are you sure ?</button>
-	 </div>
+	    <div class="list">
+			<label class="item item-input" style="border-top-width: 0px;">
+			    <button class="button button-clear col col-center" ng-click="doLogout()">Are you sure ?</button>
+			</label>
+<!-- 			<ion-toggle 
+			        ng-model="$storage.remember"
+			        ng-checked="$storage.remember">
+			    Remember me ?
+			</ion-toggle> -->
+		</div>
 	</ion-content>
 </ion-modal-view>
