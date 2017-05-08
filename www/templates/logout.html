@@ -2,19 +2,17 @@
 	<ion-header-bar>
 		<h1 class="title">Logout</h1>
 		<div class="buttons">
-		  <button class="button button-clear" ng-click="closeLogout()">Close</button>
+			<button class="button button-clear" ng-click="closeLogout()">Close</button>
 		</div>
 	</ion-header-bar>
-	 <ion-content ng-controller="MenuCtrl">
-	    <div class="list">
+	<ion-content ng-controller="MenuCtrl">
+		<div class="list">
 			<label class="item item-input" style="border-top-width: 0px;">
-			    <button class="button button-clear col col-center" ng-click="doLogout()">Are you sure ?</button>
+				<button class="button button-clear col col-center" ng-click="doLogout()">Are you sure ?</button>
 			</label>
-			<ion-toggle 
-			        ng-model="$storage.remember"
-			        ng-checked="$storage.remember">
-			    Remember me ?
-			</ion-toggle>
+			<!--<ion-toggle ng-model="$storage.remember" ng-checked="$storage.remember">
+			Remember me ?
+			</ion-toggle> -->
 		</div>
 	</ion-content>
 </ion-modal-view>

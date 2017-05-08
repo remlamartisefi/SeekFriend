@@ -26,22 +26,18 @@
           <input id="password" style="margin-right:20px;" type="password" name="Password" placeholder="Password" data-ng-model="loginData.password" data-ng-minlength="3 " data-ng-maxlength="20" required>
         </label>
         <label class="item item-input" style="border-top-width: 0px;">
-          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$invalid && !loginForm.Password.$error.minlength && !loginForm.Password.$error.maxlength">
-             Password is required</span>
-          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$error.minlength">
-              Password is too short</span>
-          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$error.maxlength">
-            Password is too long</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$invalid && !loginForm.Password.$error.minlength && !loginForm.Password.$error.maxlength"> Password is required</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$error.minlength"> Password is too short</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="loginForm.submitted && loginForm.Password.$error.maxlength"> Password is too long</span>
         </label>
-        <ion-toggle 
+        <!--<ion-toggle 
                 ng-model="$storage.remember"
                 ng-checked="$storage.remember">
             Remember me ?
-        </ion-toggle>
+          </ion-toggle>  -->
         <label class="item" style="border-bottom-width: 0px;">
           <button class="button button-block button-positive" type="submit">Log in</button>
-          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="!loginForm.$error || loginForm.invalid">
-            Email or password invalid</span>
+          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="!loginForm.$error || loginForm.invalid">Email or password invalid</span>
         </label>
       </div>
     </form>

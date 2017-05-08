@@ -1,36 +1,18 @@
 <ion-popover-view style="max-height:260px;">
 	<ion-header-bar>
-	  <h1 class="title">Options</h1>
-	    <div class="buttons">
-	      <button class="button button-clear right" ng-click="closePopoverMenu()">Close</button>
-	    </div>
-	</ion-header-bar>
-	<ion-content ng-controller="MenuCtrl">
+       <h1 class="title">Options</h1>
+       <div class="buttons">
+           <button class="button button-clear right" ng-click="closePopoverMenu()">Close</button>
+       </div>
+   </ion-header-bar>
+   <ion-content ng-controller="MenuCtrl">
       <div class="list">
-        <a class="item" ng-if="$storage.islog" ng-click="closePopoverMenu();openAddLocation()">
-        	Add your position to your history	
- 	        <!-- <i class="button button-icon icon ion-plus-round pull-right"></i> -->
-	     </a>        
-	     <a class="item" ng-if="!$storage.islog" ng-click="closePopoverMenu();openLogin()">
-        	Add your position to your history	
- 	        <!-- <i class="button button-icon icon ion-plus-round pull-right"></i> -->
-	     </a>
-        <a class="item" ng-click="closePopoverMenu();refreshLoc()">
-        	Refresh your position
- 	        <!-- <i class="button button-icon icon ion-android-locate pull-right"></i> -->
-        </a>
-        <a ng-if="!$storage.islog" class="item" ng-click="closePopoverMenu();openLogin()">
-        	Login
- 	        <!-- <i class="button button-clear icon ion-log-in pull-right"></i> -->
-        </a>
-		<a ng-if="$storage.islog" class="item" ng-click="closePopoverMenu();openLogout()">
-			Logout
-			<!-- <i class="button button-icon icon ion-log-out pull-right"></i> -->
-		</a>
-        <a class="item" ng-click="closePopoverMenu();settings()">
-        	Settings
- 	        <!-- <i class="button button-icon icon ion-android-settings pull-right"></i> -->
-        </a>
+        <a class="item" ng-if="$storage.islog" ng-click="closePopoverMenu();openAddLocation()"> Add your position to your history	</a>        
+        <a class="item" ng-if="!$storage.islog" ng-click="closePopoverMenu();openLogin()"> Add your position to your history	</a>
+        <a class="item" ng-click="closePopoverMenu();refreshLoc()">  Refresh your position</a>
+        <a ng-if="!$storage.islog" class="item" ng-click="closePopoverMenu();openLogin()"> Login </a>
+        <a ng-if="$storage.islog" class="item" ng-click="closePopoverMenu();openLogout()">Logout</a>
+        <a class="item" ng-click="closePopoverMenu();settings()">Settings </a>
       </div>
-  </ion-content>
+   </ion-content>
 </ion-popover-view>

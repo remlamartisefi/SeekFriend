@@ -14,7 +14,6 @@
     </ion-nav-bar>
     <ion-nav-view name="menuContent"></ion-nav-view>
   </ion-side-menu-content>
-
   <ion-side-menu side="left">
     <ion-header-bar class="bar-stable">
       <h1 class="title" ng-if="!$storage.isProfilView">Friends</h1>
@@ -22,9 +21,7 @@
       <a class="button button-icon icon ion-android-person" ng-if="$storage.islog" ng-click="showMyHistory()"></a>
     </ion-header-bar>
     <ion-content overflow-scroll=”true”>
-      <ion-refresher
-        on-refresh="refreshMenuData()"
-        center>
+      <ion-refresher on-refresh="refreshMenuData()" center>
       </ion-refresher>
       <ion-list>
         <ion-item menu close ng-if="!$storage.isProfilView" class="row">
@@ -36,9 +33,7 @@
           </label>
         </ion-item>
         <div ng-if="!$storage.isProfilView" ng-repeat="user in filterUserList(userlist) track by $index">
-          <ion-item class="item-stable row row-center"
-                    ng-click="toggleUser(user)"
-                    ng-class="{active: isUserShown(user)}">
+          <ion-item class="item-stable row row-center" ng-click="toggleUser(user)" ng-class="{active: isUserShown(user)}"> 
             &nbsp;
             <label class="col col-10">
               <i ng-if="user.user.isLog" class="icon ion-record balanced"></i>
@@ -52,12 +47,7 @@
               <button class="button button-icon ion-minus" ng-click="openRemoveFriend(user)"></button>
             </label>
           </ion-item>
-          <ion-item ng-if="user.isfriend" class="item-accordion"
-                    ng-repeat="info in user.info"
-                    ng-show="isUserShown(user)" 
-                    ng-click="infoWindow(info)" 
-                    ng-class="{active: isInfoShown(info)}">
-            {{info.date}}
+          <ion-item ng-if="user.isfriend" class="item-accordion" ng-repeat="info in user.info" ng-show="isUserShown(user)" ng-click="infoWindow(info)" ng-class="{active: isInfoShown(info)}">{{info.date}}
           </ion-item>
         </div>
         <ion-item menu close ng-if="$storage.isProfilView" class="row">
@@ -69,45 +59,22 @@
           </label>
         </ion-item>
         <div ng-if="$storage.isProfilView">
-          <ion-item class="item-stable"
-                    ng-click="toggleUInfo()"
-                    ng-class="{active: shownUInfo}">
+          <ion-item class="item-stable" ng-click="toggleUInfo()" ng-class="{active: shownUInfo}">
             &nbsp;
             Informations
           </ion-item>
-          <ion-item class="item-accordion"
-                    ng-repeat="(key,value) in filterUInfo(profillist.user)"
-                    ng-show="shownUInfo">
-            {{key}} : {{value}}
+          <ion-item class="item-accordion" ng-repeat="(key,value) in filterUInfo(profillist.user)" ng-show="shownUInfo"> {{key}} : {{value}}
           </ion-item>
         </div>
         <div ng-if="$storage.isProfilView" ng-repeat="info in profillist.info track by $index">
-          <ion-item class="item-stable row row-center"
-                    ng-click="toggleInfo(info)"
-                    ng-class="{active: isInfoShown(info)}">
+          <ion-item class="item-stable row row-center" ng-click="toggleInfo(info)" ng-class="{active: isInfoShown(info)}">
             &nbsp;
             <label class="col col-80">{{info.date}}</label><label class="col col-10"><button class="button button-icon ion-trash-a" ng-click="openRemoveInfo(info)"></button></label>
           </ion-item>
-          <ion-item class="item-accordion"
-                    ng-repeat="(key,value) in filterInfo(info)"
-                    ng-show="isInfoShown(info)">
-            {{key}} : {{value}}
+          <ion-item class="item-accordion" ng-repeat="(key,value) in filterInfo(info)" ng-show="isInfoShown(info)"> {{key}} : {{value}}
           </ion-item>
         </div>
-             <!--    <ion-infinite-scroll
-          ng-if="moreDataCanBeLoaded()"
-          distance="10%">
-        </ion-infinite-scroll> -->
       </ion-list>
     </ion-content>
   </ion-side-menu>
 </ion-side-menus>
-
-<!--         
-        <ion-searchbar ng-model="search"
-            showCancelButton="shouldShowCancel"
-            ionInput="onSearchInput($event)"
-            ionCancel="onSearchCancel($event)"
-            placeholder="Search a friend">
-        </ion-searchbar>
-         -->

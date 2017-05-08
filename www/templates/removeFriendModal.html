@@ -2,17 +2,17 @@
 	<ion-header-bar>
 		<h1 class="title">Remove Friend</h1>
 		<div class="buttons">
-		  <button class="button button-clear" ng-click="closeRemoveFriend()">Close</button>
+			<button class="button button-clear" ng-click="closeRemoveFriend()">Close</button>
 		</div>
 	</ion-header-bar>
-	 <ion-content ng-controller="MenuCtrl">
-	    <div class="list">
-      		<label ng-if="$storage.islog" class="item item-input" style="border-top-width: 0px;">
-	    		<button class="button button-clear col col-center" ng-click="removeFriend(removeFriendModal.data)">Remove {{removeFriendModal.data.user.pseudo}} from your friends ?</button>
-	    	</label>
-      		<label ng-if="!$storage.islog" class="item item-input" style="border-top-width: 0px;">
-	    		<button class="button button-clear col col-center" ng-click="openLogin();closeRemoveFriend()">Please log in</button>
-	    	</label>
-	 	</div>
+	<ion-content ng-controller="MenuCtrl">
+		<div class="list">
+			<label ng-if="$storage.islog" class="item item-input" style="border-top-width: 0px;">
+				<button class="button button-clear col col-center" ng-click="removeFriend(removeFriendModal.data)">Remove {{removeFriendModal.data.user.pseudo}} from your friends ?</button>
+			</label>
+			<label ng-if="!$storage.islog" class="item item-input" style="border-top-width: 0px;">
+				<button class="button button-clear col col-center" ng-click="openLogin();closeRemoveFriend()">Please log in</button>
+			</label>
+		</div>
 	</ion-content>
 </ion-modal-view>

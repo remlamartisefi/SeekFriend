@@ -10,17 +10,11 @@
         </label>
       </ion-item>
       <div ng-repeat="user in userlist track by $index">
-        <ion-item class="item-stable"
-                  ng-click="toggleUser(user)"
-                  ng-class="{active: isUserShown(user)}">
-            <!-- <i class="icon" ng-class="isUserShown(user) ? 'ion-minus' : 'ion-plus'"></i> -->
+        <ion-item class="item-stable" ng-click="toggleUser(user)" ng-class="{active: isUserShown(user)}">
           &nbsp;
           {{user.user.pseudo}}
         </ion-item>
-        <ion-item class="item-accordion"
-                  ng-repeat="info in user.info"
-                  ng-show="isUserShown(user)">
-          {{info.date}}
+        <ion-item class="item-accordion" ng-repeat="info in user.info" ng-show="isUserShown(user)"> {{info.date}}
         </ion-item>
       </div>
     </ion-list>
