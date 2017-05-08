@@ -573,7 +573,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       id : $scope.removeInfoModal.info._id,
     }
     // $scope.refreshMenuData();
-    $http.post($scope.$storage.url + '/coords/rm',data)
+    $http.delete($scope.$storage.url + '/coords/rm',data)
     .success(function(response){
       console.log("deleted !");
       console.log($scope.profillist);
@@ -618,7 +618,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       friends2 : $scope.removeFriendModal.data.user.user_id
     };
     if(data.token.length != 0 && data.email.length != 0){
-      $http.post($scope.$storage.url + '/users/removeFriend', data).success(function(response){
+      $http.delete($scope.$storage.url + '/users/removeFriend', data).success(function(response){
         console.log('Remove Friend'); 
         $scope.refreshMenuData();
         $scope.markers.forEach(function(value,key){value.setMap(null);});
