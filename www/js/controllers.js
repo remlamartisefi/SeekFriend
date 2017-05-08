@@ -520,7 +520,9 @@ $scope.reloadFriendsList = function() {
       if(!$scope.removeInfoModal.info){
          if($scope.isInfoShown(info)) {
           $scope.shownInfo = null;
-          $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
+          if($scope.profillist.info){
+            $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
+          }
         } else {
           // $ionicSideMenuDelegate.toggleLeft(false);
           $scope.$storage.panToLocation = false;
