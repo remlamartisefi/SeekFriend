@@ -267,8 +267,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
         }
         else{
           $scope.changeForm.$error = false;
-          console.log("Les deux mots de passe sont différents");
-          window.alert("Passwords are différents");
+          console.log("Les deux mots de passe sont different");
+          window.alert("Passwords are different");
         }
       }
     } 
@@ -307,7 +307,10 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.$storage.panToLocation = item.checked;
     }
     else if(item.name === "refreshMap"){
+      $scope.markers = [];
+      $scope.infowindows = [];
       $scope.reloadMap();
+      $scope.refreshMap();
       item.checked = false
     }
   };
