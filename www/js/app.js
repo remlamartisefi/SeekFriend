@@ -21,10 +21,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'ngCordova','ngStorag
   });
 
   window.onunload = function(){
-    $http.post($localStorage.url + '/users/logout', {email: $localStorage.email,token: $localStorage.token})
-    .success(function(){
-      //$localStorage = {};
-    });
+    if($localStorage.islog){
+      $http.post($localStorage.url + '/users/logout', {email: $localStorage.email,token: $localStorage.token})
+      .success(function(){
+        $localStorage = {};
+      });
+    }
   }
 }])
 

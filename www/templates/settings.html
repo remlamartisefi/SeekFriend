@@ -36,7 +36,7 @@
 	        </div>
 	    </form> -->
 
-		<form ng-controller="SignCtrl" name="changeForm" ng-if="$storage.islog" ng-submit="doChangePassword(changeData)">
+		<form ng-controller="MenuCtrl" name="changeForm" ng-if="$storage.islog" ng-submit="doChangePassword(changeData)">
 	      <div class="list">
 	        <label class="item item-input" style="border-bottom-width: 0px;">
 	          <span class="input-label">Old Password</span>
@@ -65,7 +65,7 @@
 	        </label>
 	     
 	     	<label class="item item-input" style="border-bottom-width: 0px;">
-	          <span class="input-label">Confirm New Password</span>
+	          <span class="input-label">Confirm Password</span>
 	          <input id="password3" style="margin-right:20px;" type="password" name="Password3" placeholder="Confirm New Password" data-ng-model="changeData.password3" data-ng-minlength="3" data-ng-maxlength="32" required>
 	        </label>
 	        <label class="item item-input" style="border-top-width: 0px;">
@@ -85,7 +85,7 @@
 	        </label>
 	        <label class="item item-input" style="border-top-width: 0px;border-bottom-width: 0px;">
 	          <span class="text-error" ng-style="{'color':'red'}" data-ng-show="changeForm.invalid">
-	            Password authentification failed</span>
+	            Wrong Old Password</span>
 	      	</label>
 	      </div>
 	    </form>

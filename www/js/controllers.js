@@ -112,8 +112,48 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   $scope.$on('modal.hidden', function () {$scope.popoverMenu.hide();});
 })
 
-.controller('SignCtrl',function($scope,$timeout,$http,$state,$sessionStorage){
-  $http.defaults.headers.post["Content-Type"] = "application/json";
+.controller('SignCtrl',function($scope,$rootScope,$timeout,$http,$state){
+ 
+})
+
+.controller('MapCtrl', function($scope) {
+  $scope.refreshMap();
+})
+
+.controller('SettingsCtrl', function($scope) {
+  $scope.$storage.settingsList = [
+  {
+    name: "panToLocation",
+    text: "Camera focus on your location",
+    checked: $scope.$storage.panToLocation
+  },
+  {
+    name: "refreshMap",
+    text: "Reload map",
+    checked: false
+  }
+  ];
+
+  $scope.updateItemSettings = function(item){
+    if(item.name === "panToLocation"){
+      $scope.$storage.panToLocation = item.checked;
+    }
+    else if(item.name === "refreshMap"){
+      $scope.refreshMap();
+      item.checked = false
+    }
+  };
+  
+})
+
+.controller('MenuCtrl', function($scope, $rootScope, $ionicPopup, $ionicHistory, 
+  $ionicPlatform, $cordovaGeolocation, $ionicLoading, $state, $interval, 
+  $ionicPopover, $http, $timeout, $ionicSideMenuDelegate) {
+  $http.defaults.headers.common["Accept"] = "application/json";
+
+  // Sign Ctrl methods --------------------------------------------------------------------------
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+ $http.defaults.headers.post["Content-Type"] = "application/json";
 
   // Form data for the login modal and others
   $scope.loginData = {};
@@ -155,6 +195,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           $scope.$storage.islog = true;
           $scope.$storage.isProfilView = false;
           console.log('Doing Login');
+          $scope.refreshMenuData();
           $scope.closeLogin();
         }else{
           $scope.loginForm.$error = false;
@@ -178,6 +219,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           $scope.markers.forEach(function(value,key){value.setMap(null);})
           $scope.markers = [];
         }
+        $scope.refreshMenuData();
         $scope.closeLogout();
       }).error(function(err, config) {console.log(config);});
   };
@@ -207,13 +249,14 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       && !$scope.registerForm.Password.$error.maxlength
       && $scope.registerData.password === $scope.registerData.password2)
     {
-      console.log(data);
-      console.log($scope.registerData.password2);
-      console.log($scope.registerData.password);
+      // console.log(data);
+      // console.log($scope.registerData.password2);
+      // console.log($scope.registerData.password);
       $http.post($scope.$storage.url + '/users/add', data)
       .success(function(response){
         if(!response.invalid){
           console.log('Doing Register');
+          $scope.refreshMenuData();
           $scope.$storage.isreg = true;
           $scope.closeRegister(); 
         }else{
@@ -226,7 +269,6 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
   };
 
   $scope.doChangePassword = function(changeData) {
-    console.log( $scope.changeForm);
     $scope.changeForm.submitted = true;
     $scope.changeForm.$error = true;
     $scope.changeForm.invalid = false;
@@ -258,7 +300,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
             newpassword :  $scope.changeData.password2
           };
           console.log(data);
-          $http.post($scope.$storage.url + '/users/pw', data)
+          $http.put($scope.$storage.url + '/users/pw', data)
           .success(function(response){
             if(response.valid){
               console.log('Doing Change Password');
@@ -267,7 +309,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
             }else{
               $scope.changeForm.invalid = true;
             }
-          }).error(function(err, config) {console.log(config);});
+          }).error(function(err, config) {console.log(config);$scope.changeForm.invalid = true;});
         }
         else{
           $scope.changeForm.$error = false;
@@ -287,43 +329,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     }
   };
 
-})
-
-.controller('MapCtrl', function($scope) {
-  $scope.refreshMap();
-})
-
-.controller('SettingsCtrl', function($scope) {
-  $scope.$storage.settingsList = [
-  {
-    name: "panToLocation",
-    text: "Camera focus on your location",
-    checked: $scope.$storage.panToLocation
-  }
-  // {
-  //   name: "refreshMap",
-  //   text: "Reload map",
-  //   checked: false
-  // }
-  ];
-
-  $scope.updateItemSettings = function(item){
-    if(item.name === "panToLocation"){
-      $scope.$storage.panToLocation = item.checked;
-    }
-    // else if(item.name === "refreshMap"){
-    //   $scope.refreshMap();
-    //   item.checked = false
-    // }
-  };
-  
-})
-
-.controller('MenuCtrl', function($scope, $rootScope, $ionicPopup, $ionicHistory, 
-  $ionicPlatform, $cordovaGeolocation, $ionicLoading, $state, $interval, 
-  $ionicPopover, $http, $timeout, $ionicSideMenuDelegate) {
-  $http.defaults.headers.common["Accept"] = "application/json";
-
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  // MenuCtrl Methods
   // settings option -------------------------------------------------------------------------------------
   $scope.settings = function() {
     if($ionicHistory.currentView().url != "/app/settings")
@@ -365,14 +372,14 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           if (status == google.maps.GeocoderStatus.OK) {
             $rootScope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
             $rootScope.map.setClickableIcons(true);
-            if($rootScope.map !== undefined || $rootScope.map !== null){
-              google.maps.event.addListener($rootScope.map, 'idle', function(){
+            if(typeof $rootScope.map !== undefined || typeof $rootScope.map !== null){
+              // google.maps.event.addListener($rootScope.map, 'idle', function(){
                 $rootScope.location = new google.maps.Marker({
                     map: $rootScope.map,
                     position: latLng,
                     icon: pinImage
                 });
-              });
+              // });
             }
           }
         });
@@ -391,8 +398,9 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $cordovaGeolocation.getCurrentPosition(options).then(function (position) {
         var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
         $scope.$storage.position = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        if($rootScope.location !== undefined){
+        if(typeof $rootScope.location !== undefined){
             $rootScope.location.setMap(null);
+
             $rootScope.location = new google.maps.Marker({
                 map: $rootScope.map,
                 position: latLng,
@@ -771,6 +779,8 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $http.post($scope.$storage.url + '/users/removeFriend', data).success(function(response){
         console.log('Remove Friend'); 
         $scope.refreshMenuData();
+        $scope.markers.forEach(function(value,key){value.setMap(null);});
+        $scope.markers = []
         $scope.closeRemoveFriend();
       }).error(function(err, config) {console.log(config);});
     }

@@ -6,10 +6,10 @@
       <button class="button button-clear" ng-click="closeGeo()">Close</button>
     </div>
   </ion-header-bar>
-  <ion-content>
+  <ion-content ng-controller="MenuCtrl">
 	  <div class="list">
       <label class="item item-input" style="border-top-width: 0px;">
-		    <a class="button button-icon icon ion-refresh" ng-click="reloadMap();closeGeo()"></a>
+		    <a class="button button-icon icon ion-refresh" ng-click="refreshMap();closeGeo()"></a>
       </label>
     </div>
   </ion-content>
