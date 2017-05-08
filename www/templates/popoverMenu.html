@@ -1,4 +1,4 @@
-<ion-popover-view style="max-height:260px;">
+<ion-popover-view style="max-height:210px;">
 	<ion-header-bar>
        <h1 class="title">Options</h1>
        <div class="buttons">
@@ -9,7 +9,8 @@
       <div class="list">
         <a class="item" ng-if="$storage.islog" ng-click="closePopoverMenu();openAddLocation()"> Add your position to your history	</a>        
         <a class="item" ng-if="!$storage.islog" ng-click="closePopoverMenu();openLogin()"> Add your position to your history	</a>
-        <a class="item" ng-click="closePopoverMenu();refreshLoc()">  Refresh your position</a>
+<!--         <a class="item" ng-click="closePopoverMenu();recenterMap()">  Refresh your position</a>
+ -->        
         <a ng-if="!$storage.islog" class="item" ng-click="closePopoverMenu();openLogin()"> Login </a>
         <a ng-if="$storage.islog" class="item" ng-click="closePopoverMenu();openLogout()">Logout</a>
         <a class="item" ng-click="closePopoverMenu();settings()">Settings </a>

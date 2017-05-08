@@ -8,7 +8,7 @@
 	<ion-content ng-controller="MenuCtrl">
 		<div class="list">
 			<label ng-if="$storage.islog" class="item item-input" style="border-top-width: 0px;">
-				<button class="button button-clear col col-center" ng-click="deleteInfo(removeInfoModal.info)">Remove {{removeInfoModal.info.date}} as a position in your history ?</button>
+				<button class="button button-clear col col-center" ng-click="deleteInfo()">Remove {{removeInfoModal.info.date}} as a position in your history ?</button>
 			</label>
 			<label ng-if="!$storage.islog" class="item item-input" style="border-top-width: 0px;">
 				<button class="button button-clear col col-center" ng-click="openLogin();closeFriend()">Please log in</button>

@@ -159,7 +159,6 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           $scope.$storage.islog = true;
           $scope.$storage.isProfilView = false;
           console.log('Doing Login');
-          $scope.refreshMenuData();
           $scope.closeLogin();
         }else{
           $scope.loginForm.$error = false;
@@ -179,11 +178,6 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
     .success(function(response){
       console.log('Doing Logout');
       $scope.initStorageLogout();
-      if($scope.markers){
-        $scope.markers.forEach(function(value,key){value.setMap(null);})
-        $scope.markers = [];
-      }
-      $scope.refreshMenuData();
       $scope.closeLogout();
     }).error(function(err, config) {console.log(config);});
   };
@@ -217,7 +211,6 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       .success(function(response){
         if(!response.invalid){
           console.log('Doing Register');
-          $scope.refreshMenuData();
           $scope.$storage.isreg = true;
           $scope.closeRegister(); 
         }else{
@@ -314,7 +307,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.$storage.panToLocation = item.checked;
     }
     else if(item.name === "refreshMap"){
-      $scope.refreshMap();
+      $scope.reloadMap();
       item.checked = false
     }
   };
@@ -395,6 +388,14 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
       $scope.$storage.panToLocation = true;
       $scope.refreshLoc($scope.$storage.panToLocation);
     }
+    if(!$scope.$storage.islog){
+      if($scope.markers){
+        $scope.markers.forEach(function(value,key){value.setMap(null);});
+        $scope.infowindows.forEach(function(value,key){value.close();});
+        $scope.infowindows = [];
+        $scope.markers = [];
+      }
+    }
   }, 5000); 
 
 
@@ -468,14 +469,14 @@ $scope.reloadFriendsList = function() {
   $scope.showLocation = function(info){
     var latLng = new google.maps.LatLng(info.lat, info.lng);
     $scope.markers.push(new google.maps.Marker({
-      map: $scope.map,
+      map: $rootScope.map,
       position:  latLng,
       animation: google.maps.Animation.DROP
     }));
     $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+info.date+"</label></div>"}));  
-    $scope.markers[$scope.markers.length - 1].addListener('click', function() {
-      $scope.infowindows[$scope.infowindows.length - 1].open($scope.map, $scope.markers[$scope.markers.length - 1]);
-    });
+    // $scope.markers[$scope.markers.length - 1].addListener('click', function() {
+      $scope.infowindows[$scope.infowindows.length - 1].open($rootScope.map, $scope.markers[$scope.markers.length - 1]);
+    // });
     return latLng;
   }; 
 
@@ -485,12 +486,13 @@ $scope.reloadFriendsList = function() {
   $scope.toggleUser = function(user) {
     if(user.isfriend){
       $scope.markers.forEach(function(value,key){value.setMap(null);});
-      console.log(user);
+      $scope.infowindows.forEach(function(value,key){value.close();});
+      $scope.infowindows = [];
+      $scope.markers = [];
       if($scope.isUserShown(user))
         $scope.shownUser = null;
       else {
         $scope.shownUser = user;
-        $scope.markers = [];
         user.info.forEach(function(value,key){$scope.showLocation(value);});
       }
     }
@@ -506,18 +508,23 @@ $scope.reloadFriendsList = function() {
 
     $scope.toggleInfo = function(info) {
       $scope.markers.forEach(function(value,key){value.setMap(null);});
+      $scope.infowindows.forEach(function(value,key){value.close();});
+      $scope.infowindows = [];
       $scope.markers = [];
-      if($scope.isInfoShown(info)) {
-        $scope.shownInfo = null;
-        $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
-      } else {
-        $ionicSideMenuDelegate.toggleLeft(false);
-        $scope.$storage.panToLocation = false;
-        $scope.map.panTo($scope.showLocation(info));
-        $scope.shownInfo = info;
-        $scope.infowindow = new google.maps.InfoWindow();  
-        $scope.infowindow.setContent("<div class='row row-center'><label>"+info.date+"</label></div>");
-        $scope.infowindow.open($scope.map, $scope.markers[0]);
+      var modalshown = false;
+      if(!$scope.removeInfoModal.info){
+         if($scope.isInfoShown(info)) {
+          $scope.shownInfo = null;
+          $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
+        } else {
+          // $ionicSideMenuDelegate.toggleLeft(false);
+          $scope.$storage.panToLocation = false;
+          $rootScope.map.panTo($scope.showLocation(info));
+          $scope.shownInfo = info;
+          $scope.infowindow = new google.maps.InfoWindow();  
+          $scope.infowindow.setContent("<div class='row row-center'><label>"+info.date+"</label></div>");
+          $scope.infowindow.open($rootScope.map, $scope.markers[0]);
+        }
       }
     };
 
@@ -533,8 +540,14 @@ $scope.reloadFriendsList = function() {
   $scope.toggleUInfo = function() {
     if($scope.shownUInfo)
       $scope.shownUInfo = false;
-    else
+    else{
+      $scope.markers.forEach(function(value,key){value.setMap(null);});
+      $scope.infowindows.forEach(function(value,key){value.close();});
+      $scope.infowindows = [];
+      $scope.markers = [];
+      $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
       $scope.shownUInfo = true;
+    }
   };
 
   $scope.filterUInfo = function(user){
@@ -550,6 +563,8 @@ $scope.reloadFriendsList = function() {
   // toggle the view of info detail 
   $scope.infoWindow = function(info){
     $scope.markers.forEach(function(value,key){value.setMap(null);});
+    $scope.infowindows.forEach(function(value,key){value.close();});
+    $scope.infowindows = [];
     $scope.markers = [];
     if($scope.isInfoShown(info)){
       $scope.shownInfo = null;
@@ -558,11 +573,11 @@ $scope.reloadFriendsList = function() {
     }else{
       $ionicSideMenuDelegate.toggleLeft(false);
       $scope.$storage.panToLocation = false;
-      $scope.map.panTo($scope.showLocation(info));
+      $rootScope.map.panTo($scope.showLocation(info));
       $scope.shownInfo = info;
       $scope.infowindow = new google.maps.InfoWindow();  
       $scope.infowindow.setContent("<div class='row row-center'><label>"+info.date+"</label></div>");
-      $scope.infowindow.open($scope.map, $scope.markers[0]);
+      $scope.infowindow.open($rootScope.map, $scope.markers[0]);
     }
   }
 
@@ -573,16 +588,20 @@ $scope.reloadFriendsList = function() {
       $scope.$storage.isProfilView = true;
       $scope.onProfil({search: ""});
       $scope.markers.forEach(function(value,key){value.setMap(null);});
+      $scope.infowindows.forEach(function(value,key){value.close();});
+      $scope.infowindows = [];
       $scope.markers = [];
       $timeout(function(){
         $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
-      },2000);
+      },1000);
       
     }else{
       $scope.$storage.isProfilView = false;
-      $scope.markers.forEach(function(value,key){value.setMap(null);});
-      $scope.markers = [];
       $scope.reloadFriendsList();
+      $scope.markers.forEach(function(value,key){value.setMap(null);});
+      $scope.infowindows.forEach(function(value,key){value.close();});
+      $scope.infowindows = [];
+      $scope.markers = [];
     }
   };
 
@@ -599,18 +618,18 @@ $scope.reloadFriendsList = function() {
               }
             }
           }
-        },500);
+        },1000);
       }else{
         $scope.reloadFriendsList();
         $timeout(function(){
-          $scope.userlist.forEach(function(value,key){
+          for(var key in $scope.userlist){            
             if($scope.shownUser !== undefined && $scope.shownUser !== null){
-              if(value.user._id === $scope.shownUser.user._id){
-                $scope.shownUser = value;
+              if($scope.userlist[key].user._id === $scope.shownUser.user._id){
+                $scope.shownUser = $scope.userlist[key];
               }
             }
-          });
-        },500);
+          }
+        },1000);
       }
     }else{
       if($scope.$storage.isProfilView){
@@ -627,25 +646,30 @@ $scope.reloadFriendsList = function() {
   if($scope.$storage.isProfilView){
     $scope.onProfil({search: ""});
     $scope.markers.forEach(function(value,key){value.setMap(null);});
+    $scope.infowindows.forEach(function(value,key){value.close();});
+    $scope.infowindows = [];
     $scope.markers = [];
     $timeout(function(){
       $scope.profillist.info.forEach(function(value,key){$scope.showLocation(value);});
-    },5000);
+    },1000);
   }else{
     $scope.reloadFriendsList(); 
   }
   // every 100 sec. reload the view of the sidebar menu
   var theInterval = $interval(function(){
     $scope.refreshMenuData();
-    console.log($scope.markers);
   },10000);  
   
 
   // add a marker in your database
   $scope.addLocation = function(){
+    $scope.markers.forEach(function(value,key){value.setMap(null);});
+    $scope.infowindows.forEach(function(value,key){value.close();});
+    $scope.infowindows = [];
+    $scope.markers = [];
     var latLng = new google.maps.LatLng($rootScope.location.position.lat(), $rootScope.location.position.lng());
     $scope.markers.push(new google.maps.Marker({
-      map: $rootScope.map,
+      map: $scope.map,
       position:  latLng,
       animation: google.maps.Animation.DROP
     }));
@@ -658,16 +682,26 @@ $scope.reloadFriendsList = function() {
       date: new Date().toLocaleString()
     };
     $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+data.date+"</label></div>"}));  
-    $scope.markers[$scope.markers.length-1].addListener('click', function() {
-      $scope.infowindows[$scope.infowindows.length-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
-    });
+    // $scope.markers[$scope.markers.length-1].addListener('click', function() {
+      $scope.infowindows[$scope.infowindows.length-1].open($rootScope.map, $scope.markers[$scope.markers.length-1]);
+    // });
     $http.post($scope.$storage.url + '/users/addcoords', data)
-    .success(function(response){console.log('Adding a Coord');$scope.refreshMenuData();})
+    .success(function(response){console.log('Adding a Coord');})
     .error(function(err, config) {console.log(config);});
+   
+    // $scope.onProfil({search: ""});
+
+    $timeout(function(){
+      $scope.markers[$scope.markers.length-1].setMap(null);
+      $scope.infowindows[$scope.infowindows.length-1].close();
+    },5000);  
   };
 
   $scope.doPreviousLocation = function(rangeData) {
-    
+    $scope.markers.forEach(function(value,key){value.setMap(null);});
+    $scope.infowindows.forEach(function(value,key){value.close();});
+    $scope.infowindows = [];
+    $scope.markers = [];
     var data = {
       user_id: $scope.$storage.user_id,
       lat: $scope.rangeData.latitude,
@@ -685,12 +719,12 @@ $scope.reloadFriendsList = function() {
       animation: google.maps.Animation.DROP
     }));
 
-    $scope.map.panTo(latLng);
+    $rootScope.map.panTo(latLng);
     $scope.$storage.panToLocation = false;
     $scope.infowindows.push(new google.maps.InfoWindow({content: "<div class='row row-center'><label>"+data.date+"</label></div>"}));  
-    $scope.markers[$scope.markers.length-1].addListener('click', function() {
-      $scope.infowindows[$scope.infowindows.length-1].open($scope.map, $scope.markers[$scope.markers.length-1]);
-    });
+    // $scope.markers[$scope.markers.length-1].addListener('click', function() {
+      $scope.infowindows[$scope.infowindows.length-1].open($rootScope.map, $scope.markers[$scope.markers.length-1]);
+    // });
     if(($scope.rangeData.longitude > -31) && ($scope.rangeData.longitude < 115) && ($scope.rangeData.latitude < 50) && ($scope.rangeData.latitude > -120) ){
       $http.post($scope.$storage.url + '/users/addcoords', data).success(function(response){
         console.log('Adding a Coord');
@@ -730,25 +764,30 @@ $scope.reloadFriendsList = function() {
   $scope.showStorage = function($event){console.log($scope.$storage);$scope.openPopoverUrl($event);};
 
   // delete a position from backend ------------------------------------------------------------------------
-  $scope.deleteInfo = function(info){
+  $scope.deleteInfo = function(){
     var data = {
       email : $scope.$storage.email,
       token : $scope.$storage.token,
       id : $scope.removeInfoModal.info._id,
     }
+    console.log($scope.removeInfoModal.info);
+    $scope.markers.forEach(function(value,key){value.setMap(null);});
+    $scope.infowindows.forEach(function(value,key){value.close();});
+    $scope.infowindows = [];
+    $scope.markers = [];
     // $scope.refreshMenuData();
     $http.post($scope.$storage.url + '/coords/rm',data)
     .success(function(response){
       console.log("deleted !");
       console.log($scope.profillist);
       $scope.profillist.info.forEach(function(val,index,arr){
-        if(val._id === info._id){
+        if(val._id === $scope.removeInfoModal.info._id){
           console.log(val._id);
-          $scope.markers.forEach(function(value,key){value.setMap(null);});
-          $scope.markers = [];
           arr.splice(index,1);
-          $scope.refreshMenuData(); 
+          // $scope.refreshMenuData(); 
           $scope.closeRemoveInfo();
+        }else{
+          $scope.showLocation(val);
         }
       });
     }).error(function(err, config) {console.log(config);});
@@ -784,7 +823,9 @@ $scope.reloadFriendsList = function() {
       console.log('Remove Friend'); 
       $scope.refreshMenuData();
       $scope.markers.forEach(function(value,key){value.setMap(null);});
-      $scope.markers = []
+      $scope.infowindows.forEach(function(value,key){value.close();});
+      $scope.infowindows = [];
+      $scope.markers = [];
       $scope.closeRemoveFriend();
     }).error(function(err, config) {console.log(config);});
   }

@@ -10,7 +10,7 @@
 			<ion-toggle name="item.name" ng-repeat="item in $storage.settingsList" ng-model="item.checked" ng-change="updateItemSettings(item)" ng-checked="item.checked">
 				{{ item.text }}
 			</ion-toggle>
-			<form ng-controller="MenuCtrl" name="changeForm" ng-if="$storage.islog" ng-submit="doChangePassword(changeData)">
+			<form ng-controller="SignCtrl" name="changeForm" ng-if="$storage.islog" ng-submit="doChangePassword(changeData)">
 				<div class="list">
 					<label class="item item-input" style="border-bottom-width: 0px;">
 						<span class="input-label">Old Password</span>
