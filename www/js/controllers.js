@@ -355,7 +355,9 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           }
         });
         $ionicLoading.hide(); 
-      }, function(error){console.log("Could not get location");console.log(error);$ionicLoading.hide();$scope.openGeo();});
+      }, function(error){console.log("Could not get location");console.log(error);$ionicLoading.hide();
+        // $scope.openGeo();
+      });
     });
   };
   $scope.reloadMap = function(){
