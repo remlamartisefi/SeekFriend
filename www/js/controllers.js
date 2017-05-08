@@ -345,7 +345,7 @@ angular.module('starter.controllers', ['ngCordova','ngStorage'])
           if (status == google.maps.GeocoderStatus.OK) {
             $rootScope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
             $rootScope.map.setClickableIcons(true);
-            if(typeof $rootScope.map !== undefined || typeof $rootScope.map !== null){
+            if(typeof $rootScope.map !== undefined || $rootScope.map !== null){
               $rootScope.location = new google.maps.Marker({
                 map: $rootScope.map,
                 position: latLng,
